@@ -4,9 +4,9 @@
 SCRIPT_DIR="/Users/claudioripoli/mymovies_extractor"
 
 cd "$SCRIPT_DIR" || exit 1
-# Se non ci sono argomenti, lancia la ricerca interattiva
+# Se non ci sono argomenti, lancia la ricerca interattiva Python
 if [ $# -eq 0 ]; then
-    node search_and_extract.js
+    python3 search_and_extract.py
 else
     # Altrimenti usa l'estrattore diretto
     node mymovies_extractor.js "$@"
