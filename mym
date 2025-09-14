@@ -4,4 +4,4 @@
 SCRIPT_DIR="/Users/claudioripoli/mymovies_extractor"
 
 cd "$SCRIPT_DIR" || exit 1
-node search_and_extract.js c1fccb37538d185ce09b51ea97fe1da3
+node mymovies_extractor.js "$@"
