@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
 const puppeteer = require('puppeteer');
+const fs = require('fs');
+const path = require('path');
 
 /**
  * Normalizza il titolo del film per creare URL MyMovies validi
@@ -154,6 +156,72 @@ function cleanReviewContent(rawContent, metadata) {
     return cleaned.trim();
 }
 
+/**
+ * Salva recensione con timestamp e log
+ */
+function saveReviewWithLog(result) {
+    if (!result.success) return null;
+
+    const { title, year } = result.input;
+    const timestamp = new Date();
+    const timestampStr = timestamp.toLocaleString('it-IT', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+
+    // Normalizza nome file
+    const normalizedTitle = normalizeFilmTitle(title);
+    const fileName = `${normalizedTitle}_${year}_review.txt`;
+    const reviewsDir = path.join(__dirname, 'reviews');
+    const filePath = path.join(reviewsDir, fileName);
+
+    // Crea directory se non esiste
+    if (!fs.existsSync(reviewsDir)) {
+        fs.mkdirSync(reviewsDir, { recursive: true });
+    }
+
+    // Costruisci contenuto con timestamp e log
+    const content = `📅 ESTRATTO IL: ${timestampStr}
+
+🎬 ${result.review.title || title} (${year})
+👤 ${result.review.author || 'Autore sconosciuto'}
+📅 ${result.review.date || 'Data non disponibile'}
+📊 ${result.metadata.contentLength} caratteri
+
+📖 RECENSIONE:
+================================================================================
+${result.review.content}
+================================================================================
+
+📋 LOG ESTRAZIONE:
+================================================================================
+🌐 URL: ${result.url}
+⏱️  Tempo elaborazione: ${result.metadata.processingTime}ms
+🔧 Metodo estrazione: ${result.metadata.extractionMethod}
+📏 Parole: ${result.metadata.wordCount}
+💾 File: ${fileName}
+🕐 Timestamp: ${timestamp.toISOString()}
+🖥️  User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36
+🔍 Selettori utilizzati: p.corpo, .corpo, #recensione
+📱 Viewport: Default Puppeteer
+🌍 Lingua: Italiano
+================================================================================
+`;
+
+    try {
+        fs.writeFileSync(filePath, content, 'utf8');
+        return filePath;
+    } catch (error) {
+        console.error('❌ Errore salvataggio:', error.message);
+        return null;
+    }
+}
+
 
 /**
  * Funzione principale per estrarre recensione
@@ -300,7 +368,16 @@ async function extractMovieReview(title, year, options = {}) {
             
             
             console.log(`✅ Successo! ${reviewContent.length} caratteri estratti`);
-            
+
+            // Salva con timestamp e log (sempre, a meno che non sia specificato --no-save)
+            if (!options.noSave) {
+                const savedPath = saveReviewWithLog(result);
+                if (savedPath) {
+                    console.log(`💾 File salvato: ${path.basename(savedPath)}`);
+                    result.filePath = savedPath;
+                }
+            }
+
         } else {
             result.error = 'Recensione non trovata o troppo breve';
             console.log('❌ Recensione non trovata');
@@ -322,8 +399,12 @@ async function main() {
     const args = process.argv.slice(2);
     
     if (args.length < 2) {
-        console.log('Usage: node mymovies_extractor.js "Titolo Film" ANNO [--json] [--verbose]');
+        console.log('Usage: node mymovies_extractor.js "Titolo Film" ANNO [--json] [--verbose] [--no-save]');
         console.log('Example: node mymovies_extractor.js "Oppenheimer" 2023');
+        console.log('Options:');
+        console.log('  --json      Output in JSON format');
+        console.log('  --verbose   Show browser (non-headless mode)');
+        console.log('  --no-save   Don\'t save review to file');
         process.exit(1);
     }
     
@@ -331,6 +412,7 @@ async function main() {
     const year = parseInt(args[1]);
     const outputJson = args.includes('--json');
     const verbose = args.includes('--verbose');
+    const noSave = args.includes('--no-save');
     
     if (!year || year < 1900 || year > 2030) {
         console.error('Errore: Anno non valido');
@@ -338,8 +420,9 @@ async function main() {
     }
     
     try {
-        const result = await extractMovieReview(title, year, { 
-            headless: !verbose 
+        const result = await extractMovieReview(title, year, {
+            headless: !verbose,
+            noSave: noSave
         });
         
         if (outputJson) {
