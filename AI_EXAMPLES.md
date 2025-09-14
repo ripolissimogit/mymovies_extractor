@@ -1,6 +1,30 @@
-# AI Terminal Examples - MyMovies Extractor
+# 🤖 AI Integration Examples - MyMovies Extractor v2.0
 
-Esempi pratici di come diversi AI assistants possono usare il wrapper.
+Esempi pratici di integrazione con AI assistants e strumenti di automazione.
+
+## 🔍 Claude Code Integration
+
+### Ricerca e Estrazione Completa
+```bash
+# L'AI può usare il comando mym per ricerca interattiva
+user: "Trova e estrai la recensione di Dune: Part Two"
+
+# Claude Code execution:
+export TMDB_API_KEY='your_api_key'
+echo -e "dune part two\n1\ns\nquit" | mym
+
+# Output: Recensione estratta con timestamp e log completo
+```
+
+### Estrazione Diretta con Metadati
+```bash
+# Per film specifici con anno noto
+mym "Oppenheimer" 2023 --json > oppenheimer_review.json
+
+# Analisi del JSON risultante
+cat oppenheimer_review.json | jq '.review.content' | wc -w
+# Output: Conteggio parole della recensione
+```
 
 ## 🤖 Scenario 1: Aider (AI Code Assistant)
 

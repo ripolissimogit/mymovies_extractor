@@ -1,12 +1,32 @@
-# Guida all'Estrazione di Recensioni da MyMovies.it
+# 📚 Guida Tecnica all'Estrazione da MyMovies.it
 
-## Panoramica del Problema
+## 🎯 Panoramica del Sistema v2.0
 
-MyMovies.it presenta una sfida particolare nell'estrazione di recensioni a causa della sua architettura tecnica specifica:
+Il **MyMovies Extractor v2.0** è un sistema completo che combina:
+
+### 🔍 **Ricerca Intelligente**
+- **TMDB API Integration**: Ricerca film nel database mondiale
+- **Ricerca interattiva**: Interfaccia utente guidata
+- **Fallback multilingue**: Titolo italiano → originale
+
+### ⚡ **Estrazione Robusta**
+- **Timeout esteso**: 180 secondi per connessioni lente
+- **Dual method**: HTML Response + DOM Fallback
+- **Error handling**: Gestione completa degli errori
+
+### 📄 **Output Avanzato**
+- **Timestamp preciso**: Data/ora estrazione
+- **Log dettagliato**: Metadati completi per debug
+- **Formato standardizzato**: Consistente e leggibile
+
+## 🏗️ Architettura Tecnica
+
+MyMovies.it presenta sfide specifiche:
 
 - **Tecnologia**: AMP (Accelerated Mobile Pages) con caricamento dinamico
-- **Anchor**: L'URL con `#recensione` funziona ma il contenuto non è immediatamente visibile nel DOM
-- **Contenuto**: La recensione completa è presente nell'HTML iniziale ma nascosta in elementi specifici
+- **Anchor**: L'URL `#recensione` funziona ma il contenuto non è immediatamente nel DOM
+- **Content Loading**: Recensione presente nell'HTML ma in elementi nascosti
+- **Anti-scraping**: Rate limiting e user-agent detection
 
 ## Struttura della Pagina
 
