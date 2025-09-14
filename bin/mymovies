@@ -1,0 +1,103 @@
+#!/bin/bash
+
+# MyMovies.it Review Extractor - Bash Wrapper
+# Usage: mymovies "Titolo Film" Anno [opzioni]
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+
+show_help() {
+    echo "🎬 MyMovies.it Review Extractor"
+    echo ""
+    echo "Usage:"
+    echo "  mymovies \"Titolo Film\" Anno [opzioni]"
+    echo ""
+    echo "Esempi:"
+    echo "  mymovies \"Oppenheimer\" 2023"
+    echo "  mymovies \"The Brutalist\" 2024 --json"
+    echo "  mymovies \"Bugonia\" 2025 --debug"
+    echo ""
+    echo "Opzioni:"
+    echo "  --json          Output in formato JSON"
+    echo "  --debug         Modalità debug dettagliata"  
+    echo "  --no-save       Non salvare file automaticamente"
+    echo "  --help, -h      Mostra questo aiuto"
+    echo ""
+    echo "File salvati in: $PROJECT_DIR/reviews/"
+}
+
+# Controlla argomenti
+if [ $# -eq 0 ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+    show_help
+    exit 0
+fi
+
+if [ $# -lt 2 ]; then
+    echo "❌ Errore: Titolo e anno richiesti"
+    echo "Usa: mymovies --help per maggiori informazioni"
+    exit 1
+fi
+
+TITLE="$1"
+YEAR="$2"
+shift 2  # Rimuovi titolo e anno dagli argomenti
+
+# Controlla che l'anno sia valido
+if ! [[ "$YEAR" =~ ^[0-9]{4}$ ]] || [ "$YEAR" -lt 1900 ] || [ "$YEAR" -gt 2030 ]; then
+    echo "❌ Errore: Anno non valido ($YEAR)"
+    echo "Deve essere un anno tra 1900 e 2030"
+    exit 1
+fi
+
+# Parse opzioni
+JSON_MODE=false
+DEBUG_MODE=false
+NO_SAVE=false
+
+while [ $# -gt 0 ]; do
+    case $1 in
+        --json)
+            JSON_MODE=true
+            ;;
+        --debug)
+            DEBUG_MODE=true
+            ;;
+        --no-save)
+            NO_SAVE=true
+            ;;
+        *)
+            echo "❌ Opzione sconosciuta: $1"
+            echo "Usa: mymovies --help per maggiori informazioni"
+            exit 1
+            ;;
+    esac
+    shift
+done
+
+# Controlla che Node.js sia installato
+if ! command -v node &> /dev/null; then
+    echo "❌ Errore: Node.js non è installato"
+    echo "Installa Node.js da: https://nodejs.org"
+    exit 1
+fi
+
+# Controlla che Puppeteer sia installato
+if [ ! -d "$PROJECT_DIR/node_modules/puppeteer" ]; then
+    echo "⚠️  Puppeteer non installato, installazione in corso..."
+    cd "$PROJECT_DIR"
+    npm install puppeteer
+    if [ $? -ne 0 ]; then
+        echo "❌ Errore durante installazione di Puppeteer"
+        exit 1
+    fi
+fi
+
+# Esegui script appropriato
+cd "$PROJECT_DIR"
+
+if [ "$JSON_MODE" = true ]; then
+    node mymovies_extractor.js "$TITLE" "$YEAR" --json
+else
+    # Modalità normale (usa sempre --no-save per semplicità)
+    node mymovies_extractor.js "$TITLE" "$YEAR"
+fi

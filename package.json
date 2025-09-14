@@ -1,0 +1,33 @@
+{
+  "name": "mymovies-extractor",
+  "version": "1.0.0",
+  "description": "Tool per estrarre recensioni complete da MyMovies.it",
+  "main": "mymovies_extractor.js",
+  "scripts": {
+    "extract": "node mymovies_extractor.js",
+    "show": "node show_content.js",
+    "debug": "node show_content_debug.js",
+    "test": "node show_content.js \"Oppenheimer\" 2023"
+  },
+  "keywords": [
+    "mymovies",
+    "scraping",
+    "reviews",
+    "cinema",
+    "puppeteer",
+    "amp"
+  ],
+  "author": "Claude Code",
+  "license": "MIT",
+  "dependencies": {
+    "puppeteer": "^21.0.0"
+  },
+  "bin": {
+    "mymovies-extract": "./mymovies_extractor.js",
+    "mymovies-show": "./show_content.js",
+    "mymovies-debug": "./show_content_debug.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

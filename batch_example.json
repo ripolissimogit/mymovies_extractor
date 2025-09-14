@@ -1,0 +1,14 @@
+{
+  "films": [
+    {"title": "Oppenheimer", "year": 2023},
+    {"title": "The Brutalist", "year": 2024},
+    {"title": "Nosferatu", "year": 2024},
+    {"title": "Bugonia", "year": 2025},
+    {"title": "Dune", "year": 2021}
+  ],
+  "options": {
+    "format": "json",
+    "save_files": true,
+    "rate_limit": 2000
+  }
+}

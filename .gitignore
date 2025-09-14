@@ -1,0 +1,6 @@
+node_modules/
+*.log
+.DS_Store
+reviews/*.txt
+reviews/*/
+!reviews/.gitkeep
