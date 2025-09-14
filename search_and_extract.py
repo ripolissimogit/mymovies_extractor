@@ -65,7 +65,7 @@ class TMDBMovieSearch:
         url = f"{self.base_url}/movie/{movie_id}"
         params = {
             'api_key': self.api_key,
-            'language': 'it-IT',
+            'language': 'en-EN',  # English per nomi registi romanizzati
             'append_to_response': 'credits'
         }
         
