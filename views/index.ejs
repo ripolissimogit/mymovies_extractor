@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyMovies Extractor</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background-color: #f5f5f5; 
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group { 
+            margin: 15px 0; 
+        }
+        label { 
+            display: block; 
+            margin-bottom: 5px; 
+            font-weight: bold; 
+            color: #333;
+        }
+        input, select { 
+            width: 100%; 
+            padding: 10px; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button { 
+            background: #007bff; 
+            color: white; 
+            padding: 12px 24px; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover { 
+            background: #0056b3; 
+        }
+        .error { 
+            color: red; 
+            background: #ffe6e6; 
+            padding: 15px; 
+            border-radius: 4px; 
+            margin: 15px 0; 
+            border-left: 4px solid #ff0000;
+        }
+        .header { 
+            text-align: center; 
+            margin-bottom: 30px; 
+            color: #333;
+        }
+        .header h1 {
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+        .examples {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 MyMovies Extractor</h1>
+            <p>Estrai recensioni da MyMovies.it</p>
+        </div>
+
+        <% if (error) { %>
+            <div class="error"><%= error %></div>
+        <% } %>
+
+        <form action="/extract" method="POST">
+            <div class="form-group">
+                <label for="title">Titolo del Film:</label>
+                <input type="text" id="title" name="title" required placeholder="es. Oppenheimer">
+            </div>
+
+            <div class="form-group">
+                <label for="year">Anno:</label>
+                <input type="number" id="year" name="year" required min="1900" max="2030" placeholder="es. 2023">
+            </div>
+
+            <div class="form-group">
+                <label for="format">Formato output:</label>
+                <select id="format" name="format">
+                    <option value="text">Testo formattato</option>
+                    <option value="json">JSON completo</option>
+                </select>
+            </div>
+
+            <button type="submit">🔍 Estrai Recensione</button>
+        </form>
+
+        <div class="examples">
+            <strong>Esempi:</strong><br>
+            • Oppenheimer, 2023<br>
+            • The Brutalist, 2024<br>
+            • Dune, 2021
+        </div>
+    </div>
+</body>
+</html>

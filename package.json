@@ -4,6 +4,8 @@
   "description": "Tool per estrarre recensioni complete da MyMovies.it",
   "main": "mymovies_extractor.js",
   "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
     "extract": "node mymovies_extractor.js",
     "show": "node show_content.js",
     "debug": "node show_content_debug.js",
@@ -20,6 +22,8 @@
   "author": "Claude Code",
   "license": "MIT",
   "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
     "puppeteer": "^21.0.0"
   },
   "bin": {
