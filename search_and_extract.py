@@ -145,25 +145,94 @@ def print_movie_list(movies):
     print("\n" + "="*80)
 
 def get_user_choice(max_num):
-    """Ottiene scelta utente"""
+    """Ottiene scelta utente con opzioni aggiuntive"""
     while True:
         try:
-            choice = input(f"\n🎯 Scegli film (1-{max_num}) o 'q' per uscire: ").strip().lower()
-            
+            choice = input(f"\n🎯 Scegli film (1-{max_num}), 'r' per ripetere ricerca, o 'q' per uscire: ").strip().lower()
+
             if choice == 'q' or choice == 'quit':
-                return None
-                
+                return 'quit'
+
+            if choice == 'r' or choice == 'repeat':
+                return 'repeat'
+
             choice_num = int(choice)
             if 1 <= choice_num <= max_num:
                 return choice_num - 1  # Return 0-based index
             else:
                 print(f"❌ Inserisci un numero tra 1 e {max_num}")
-                
+
         except ValueError:
-            print("❌ Inserisci un numero valido o 'q' per uscire")
+            print("❌ Inserisci un numero valido, 'r' per ripetere ricerca, o 'q' per uscire")
         except KeyboardInterrupt:
             print("\n👋 Uscita...")
-            return None
+            return 'quit'
+
+def show_review_file(title, year):
+    """Mostra il contenuto della recensione salvata"""
+    import os
+
+    # Normalizza titolo come fa JavaScript
+    def normalize_title_py(title):
+        import re
+        title = title.lower()
+        # Caratteri speciali
+        replacements = {
+            'à': 'a', 'á': 'a', 'â': 'a', 'ã': 'a', 'ä': 'a', 'å': 'a',
+            'è': 'e', 'é': 'e', 'ê': 'e', 'ë': 'e',
+            'ì': 'i', 'í': 'i', 'î': 'i', 'ï': 'i',
+            'ò': 'o', 'ó': 'o', 'ô': 'o', 'õ': 'o', 'ö': 'o', 'ø': 'o',
+            'ù': 'u', 'ú': 'u', 'û': 'u', 'ü': 'u',
+            'ý': 'y', 'ÿ': 'y', 'ñ': 'n', 'ç': 'c'
+        }
+        for old, new in replacements.items():
+            title = title.replace(old, new)
+        title = re.sub(r'[^a-z0-9\s]', '', title)
+        title = re.sub(r'\s+', '-', title)
+        return title.strip('-')
+
+    normalized_title = normalize_title_py(title)
+    filename = f"{normalized_title}_{year}_review.txt"
+    filepath = os.path.join('reviews', filename)
+
+    if os.path.exists(filepath):
+        print(f"\n📄 RECENSIONE: {title} ({year})")
+        print("="*80)
+        try:
+            with open(filepath, 'r', encoding='utf-8') as f:
+                content = f.read()
+                print(content)
+        except Exception as e:
+            print(f"❌ Errore lettura file: {e}")
+    else:
+        print(f"❌ File recensione non trovato: {filename}")
+
+def get_post_extraction_choice():
+    """Menu dopo estrazione completata"""
+    print(f"\n🎉 Cosa vuoi fare ora?")
+    print(f"  v) 📖 Visualizza recensione estratta")
+    print(f"  u) 🔄 Scegli altro film dall'elenco precedente")
+    print(f"  r) 🔍 Nuova ricerca")
+    print(f"  q) 👋 Esci")
+
+    while True:
+        try:
+            choice = input(f"\nScelta (v/u/r/q): ").strip().lower()
+
+            if choice in ['v', 'view']:
+                return 'view'
+            elif choice in ['u', 'up']:
+                return 'choose_another'
+            elif choice in ['r', 'repeat']:
+                return 'new_search'
+            elif choice in ['q', 'quit']:
+                return 'quit'
+            else:
+                print("❌ Opzioni valide: v (visualizza), u (altro film), r (nuova ricerca), q (esci)")
+
+        except KeyboardInterrupt:
+            print("\n👋 Uscita...")
+            return 'quit'
 
 def main():
     print("🎬 MyMovies Smart Search & Extract")
@@ -194,37 +263,49 @@ def main():
     extractor = MyMoviesExtractor(script_dir)
     
     try:
+        current_movies = []  # Mantieni l'ultimo elenco film
+
         while True:
-            # Input ricerca
-            query = input("\n🔍 Cerca film (o 'quit' per uscire): ").strip()
+            # Input ricerca (può essere saltato se si torna alla selezione film)
+            if not current_movies:  # Solo se non abbiamo film da mostrare
+                query = input("\n🔍 Cerca film (o 'quit' per uscire): ").strip()
+
+                if query.lower() in ['quit', 'q', 'exit']:
+                    print("👋 Arrivederci!")
+                    break
+
+                if not query:
+                    print("❌ Inserisci un titolo da cercare")
+                    continue
+
+                print(f"\n🔍 Ricerca '{query}' su TMDB...")
+
+                # Cerca film
+                current_movies = tmdb.search_movies(query)
+
+                if not current_movies:
+                    print("❌ Nessun film trovato. Prova con un altro titolo.")
+                    continue
+
+            # Mostra risultati (sempre se abbiamo film)
+            if current_movies:
+                print_movie_list(current_movies)
+
+                # Scelta utente
+                choice_result = get_user_choice(len(current_movies))
+
+                if choice_result == 'quit':
+                    print("👋 Arrivederci!")
+                    break
+                elif choice_result == 'repeat':
+                    current_movies = []  # Reset per nuova ricerca
+                    continue
+                elif isinstance(choice_result, int):
+                    choice_idx = choice_result
+                else:
+                    continue
             
-            if query.lower() in ['quit', 'q', 'exit']:
-                print("👋 Arrivederci!")
-                break
-                
-            if not query:
-                print("❌ Inserisci un titolo da cercare")
-                continue
-            
-            print(f"\n🔍 Ricerca '{query}' su TMDB...")
-            
-            # Cerca film
-            movies = tmdb.search_movies(query)
-            
-            if not movies:
-                print("❌ Nessun film trovato. Prova con un altro titolo.")
-                continue
-            
-            # Mostra risultati
-            print_movie_list(movies)
-            
-            # Scelta utente
-            choice_idx = get_user_choice(len(movies))
-            
-            if choice_idx is None:
-                continue
-            
-            selected_movie = movies[choice_idx]
+            selected_movie = current_movies[choice_idx]
             title = selected_movie['title']
             year = selected_movie['year']
             
@@ -272,10 +353,31 @@ def main():
                         print(f"💾 Salvato in: {os.path.basename(result['file_path'])}")
                     
                     print(f"\n✨ Recensione estratta con successo!")
-                    
+
+                    # Menu post-estrazione
+                    while True:
+                        post_choice = get_post_extraction_choice()
+
+                        if post_choice == 'view':
+                            show_review_file(title, year)
+                            continue  # Mostra di nuovo il menu
+
+                        elif post_choice == 'choose_another':
+                            # Torna alla selezione film (mantiene current_movies)
+                            break
+
+                        elif post_choice == 'new_search':
+                            # Reset per nuova ricerca
+                            current_movies = []
+                            break
+
+                        elif post_choice == 'quit':
+                            print("👋 Arrivederci!")
+                            return
+
                 else:
                     print(f"\n❌ Errore estrazione: {result.get('message', 'Unknown error')}")
-            
+
             print(f"\n" + "="*50)
     
     except KeyboardInterrupt:
