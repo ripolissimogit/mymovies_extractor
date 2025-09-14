@@ -234,6 +234,30 @@ def get_post_extraction_choice():
             print("\n👋 Uscita...")
             return 'quit'
 
+def get_extraction_confirmation(title, year):
+    """Chiede conferma per estrazione con opzione di tornare indietro"""
+    print(f"\n🚀 Vuoi estrarre la recensione di '{title} ({year})'?")
+    print(f"  s) ✅ Sì, estrai la recensione")
+    print(f"  n) ❌ No, torna alla ricerca")
+    print(f"  u) 🔙 Torna alla lista film")
+
+    while True:
+        try:
+            choice = input(f"\nScelta (s/n/u): ").strip().lower()
+
+            if choice in ['s', 'si', 'y', 'yes']:
+                return 'extract'
+            elif choice in ['n', 'no']:
+                return 'new_search'
+            elif choice in ['u', 'up', 'back']:
+                return 'back_to_list'
+            else:
+                print("❌ Opzioni valide: s (sì), n (nuova ricerca), u (torna alla lista)")
+
+        except KeyboardInterrupt:
+            print("\n👋 Uscita...")
+            return 'quit'
+
 def main():
     print("🎬 MyMovies Smart Search & Extract")
     print("="*50)
@@ -332,10 +356,10 @@ def main():
             else:
                 print(f"✅ Film trovato su MyMovies.it!")
             
-            # Conferma estrazione
-            confirm = input(f"\n🚀 Vuoi estrarre la recensione? (s/n): ").strip().lower()
-            
-            if confirm in ['s', 'si', 'y', 'yes']:
+            # Conferma estrazione con opzioni
+            confirmation = get_extraction_confirmation(title, year)
+
+            if confirmation == 'extract':
                 print(f"\n⏳ Estrazione recensione di '{title} ({year})'...")
                 print("📝 Questo potrebbe richiedere 30-60 secondi...")
                 
@@ -377,6 +401,19 @@ def main():
 
                 else:
                     print(f"\n❌ Errore estrazione: {result.get('message', 'Unknown error')}")
+
+            elif confirmation == 'new_search':
+                # Reset per nuova ricerca
+                current_movies = []
+                continue
+
+            elif confirmation == 'back_to_list':
+                # Torna alla lista film (mantiene current_movies)
+                continue
+
+            elif confirmation == 'quit':
+                print("👋 Arrivederci!")
+                break
 
             print(f"\n" + "="*50)
     
