@@ -119,7 +119,7 @@ class MyMoviesExtractor:
         cmd = [self.ai_wrapper, 'extract', title, str(year)]
         
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
             if result.stdout.strip():
                 data = json.loads(result.stdout)
                 return data
