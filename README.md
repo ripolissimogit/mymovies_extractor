@@ -4,7 +4,7 @@
 
 Utilizza Puppeteer per superare le limitazioni dell'architettura AMP e include integrazione TMDB per ricerca intelligente dei film.
 
-## 🚀 Installazione Rapida
+## Installazione Rapida
 
 ```bash
 git clone https://github.com/ripolissimogit/mymovies_extractor.git
@@ -12,7 +12,7 @@ cd mymovies_extractor
 npm install
 ```
 
-### 🔑 Setup TMDB API (per ricerca interattiva)
+### Setup TMDB API (per ricerca interattiva)
 
 1. Ottieni API key da: https://www.themoviedb.org/settings/api
 2. Imposta la variabile d'ambiente:
@@ -22,12 +22,12 @@ npm install
    echo 'export TMDB_API_KEY="your_api_key"' >> ~/.zshrc
    ```
 
-### 🔥 Comando Principale: `mym`
+### Comando Principale: `mym`
 
 Il comando `mym` è l'interfaccia unificata per tutte le operazioni:
 
 ```bash
-# 🔍 RICERCA INTERATTIVA (raccomandato)
+# RICERCA INTERATTIVA (raccomandato)
 mym
 # Ti guida nella ricerca e selezione del film
 
@@ -41,73 +41,73 @@ mym "Dune" 2021 --verbose        # Mostra browser (debug)
 mym "Avatar" 2009 --no-save      # Non salvare file
 ```
 
-### ⚡ Ricerca Interattiva (Modalità Principale)
+### Ricerca Interattiva (Modalita Principale)
 
 ```bash
 mym
-🔍 Cerca film (o "quit" per uscire): Interstellar
+Cerca film (o "quit" per uscire): Interstellar
 
 # Mostra risultati TMDB:
-1. 📽️  Interstellar (2014) - Christopher Nolan
-2. 📽️  The Science of Interstellar (2014)
+1. Interstellar (2014) - Christopher Nolan
+2. The Science of Interstellar (2014)
 ...
 
-🎯 Scegli film (1-10): 1
-🚀 Vuoi estrarre la recensione? (s/n): s
+Scegli film (1-10): 1
+Vuoi estrarre la recensione? (s/n): s
 
-✨ Recensione estratta e salvata automaticamente!
+Recensione estratta e salvata automaticamente!
 ```
 
-## 📄 Nuovo Formato Recensioni
+## Nuovo Formato Recensioni
 
 Ogni recensione salvata include **timestamp** e **log dettagliato**:
 
 ```
-📅 ESTRATTO IL: domenica 14 settembre 2025 alle ore 16:10:31
+ESTRATTO IL: domenica 14 settembre 2025 alle ore 16:10:31
 
-🎬 Interstellar (2014)
-👤 Gabriele Niola
-📅 sabato 22 novembre 2014
-📊 5086 caratteri
+Interstellar (2014)
+Autore: Gabriele Niola
+Data: sabato 22 novembre 2014
+Lunghezza: 5086 caratteri
 
-📖 RECENSIONE:
+RECENSIONE:
 ================================================================================
 [Contenuto della recensione completa]
 ================================================================================
 
-📋 LOG ESTRAZIONE:
+LOG ESTRAZIONE:
 ================================================================================
-🌐 URL: https://www.mymovies.it/film/2014/interstellar/#recensione
-⏱️  Tempo elaborazione: 4250ms
-🔧 Metodo estrazione: HTML_RESPONSE
-📏 Parole: 815
-💾 File: interstellar_2014_review.txt
-🕐 Timestamp: 2025-09-14T14:10:31.353Z
-🖥️  User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)
-🔍 Selettori utilizzati: p.corpo, .corpo, #recensione
-📱 Viewport: Default Puppeteer
-🌍 Lingua: Italiano
+URL: https://www.mymovies.it/film/2014/interstellar/#recensione
+Tempo elaborazione: 4250ms
+Metodo estrazione: HTML_RESPONSE
+Parole: 815
+File: interstellar_2014_review.txt
+Timestamp: 2025-09-14T14:10:31.353Z
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)
+Selettori utilizzati: p.corpo, .corpo, #recensione
+Viewport: Default Puppeteer
+Lingua: Italiano
 ================================================================================
 ```
 
-## 📋 Architettura del Progetto
+## Architettura del Progetto
 
-### 🔧 **Script Principali**
+### **Script Principali**
 - **`mym`** - Comando unificato (ricerca + estrazione)
 - **`mymovies_extractor.js`** - Core extractor con timestamp e logging
 - **`search_and_extract.py`** - Ricerca interattiva con TMDB API
 - **`ai_wrapper.sh`** - Wrapper per AI integration
 - **`bin/mymovies`** - CLI wrapper per l'extractor
 
-### 📚 **Documentazione**
+### **Documentazione**
 - **`README.md`** - Questa guida
 - **`GUIDA_ESTRAZIONE_MYMOVIES.md`** - Guida tecnica dettagliata
 - **`AI_EXAMPLES.md`** - Esempi per integrazione AI
 
-### 📁 **Directory**
+### **Directory**
 - **`reviews/`** - Recensioni estratte con timestamp e log
 
-## 🔌 Uso come Modulo JavaScript
+## Uso come Modulo JavaScript
 
 ```javascript
 const { extractMovieReview } = require('./mymovies_extractor');
@@ -127,7 +127,7 @@ const result = await extractMovieReview("Dune", 2021, {
 });
 ```
 
-## 📊 Output JSON Strutturato
+## Output JSON Strutturato
 
 ```json
 {
@@ -149,36 +149,36 @@ const result = await extractMovieReview("Dune", 2021, {
 }
 ```
 
-## ✅ Film Testati con Successo
+## Film Testati con Successo
 
-- ✅ **Oppenheimer (2023)** - Andrea Fornasiero - 6420 caratteri
-- ✅ **Interstellar (2014)** - Gabriele Niola - 5086 caratteri
-- ✅ **The Brutalist (2024)** - Emanuele Sacchi - 4856 caratteri
-- ✅ **The Smashing Machine (2025)** - 4963 caratteri
-- ✅ **Un Film Fatto Per Bene (2025)** - Roberto Manassero - 4731 caratteri
-- ✅ **La Grazia (2025)** - 5439 caratteri
-- ✅ **Nosferatu (2024)** - 5411 caratteri
+- **Oppenheimer (2023)** - Andrea Fornasiero - 6420 caratteri
+- **Interstellar (2014)** - Gabriele Niola - 5086 caratteri
+- **The Brutalist (2024)** - Emanuele Sacchi - 4856 caratteri
+- **The Smashing Machine (2025)** - 4963 caratteri
+- **Un Film Fatto Per Bene (2025)** - Roberto Manassero - 4731 caratteri
+- **La Grazia (2025)** - 5439 caratteri
+- **Nosferatu (2024)** - 5411 caratteri
 
-## 🆕 Nuove Funzionalità v2.0
+## Nuove Funzionalita v2.0
 
-### 🔍 Ricerca Intelligente
+### Ricerca Intelligente
 - **Integrazione TMDB**: Cerca film nel database mondiale
 - **Selezione interattiva**: Scegli dai risultati trovati
 - **Fallback titoli**: Prova titolo originale se quello italiano non funziona
 
-### 📅 Timestamp e Logging
+### Timestamp e Logging
 - **Timestamp completo** all'inizio di ogni file
 - **Log dettagliato** con metadati di estrazione
 - **Tracking performance** per debug e ottimizzazione
 
-### ⚡ Performance Migliorate
+### Performance Migliorate
 - **Timeout esteso** (180 secondi) per estrazioni stabili
 - **Error handling** migliorato
 - **Salvataggio automatico** con nomi file normalizzati
 
-## 🔍 Troubleshooting
+## Troubleshooting
 
-### ❌ TMDB API Key mancante
+### TMDB API Key mancante
 ```bash
 # Imposta la variabile d'ambiente
 export TMDB_API_KEY='your_api_key_here'
@@ -187,28 +187,28 @@ echo 'export TMDB_API_KEY="your_key"' >> ~/.zshrc
 source ~/.zshrc
 ```
 
-### ❌ Film non trovato nella ricerca
+### Film non trovato nella ricerca
 1. **Usa la ricerca interattiva**: `mym` trova più facilmente i film
 2. **Prova varianti del titolo**: titolo originale vs tradotto
 3. **Verifica l'anno**: potrebbero esserci più versioni
 
-### ❌ Recensione non trovata
+### Recensione non trovata
 1. Il film potrebbe non avere recensioni su MyMovies.it
 2. Film molto nuovi potrebbero non avere ancora recensioni
 3. Prova l'estrazione diretta: `mym "Titolo" Anno --verbose`
 
-### ❌ Timeout/Errori di rete
+### Timeout/Errori di rete
 1. **Timeout esteso**: ora usa 180 secondi (era 60)
 2. **Controlla connessione** a MyMovies.it
 3. **Riprova più tardi**: il sito potrebbe essere sovraccarico
 
-### 🐛 Debug Mode
+### Debug Mode
 ```bash
 mym "Film" 2023 --verbose    # Mostra browser
 mym "Film" 2023 --no-save    # Test senza salvare
 ```
 
-## 🎯 Metodologia
+## Metodologia
 
 L'extractor utilizza **intercettazione della response HTML** invece del DOM parsing per superare le limitazioni dell'architettura AMP di MyMovies.it:
 
@@ -217,7 +217,7 @@ L'extractor utilizza **intercettazione della response HTML** invece del DOM pars
 3. **Estrae** il contenuto della recensione
 4. **Valida** la qualità del testo estratto
 
-## 📈 Performance & Statistiche
+## Performance & Statistiche
 
 - **Tasso di successo**: >95% su film con recensioni pubblicate
 - **Tempo medio**: 4-6 secondi per estrazione (più timeout)
@@ -252,15 +252,15 @@ Il titolo viene automaticamente normalizzato:
 - Caratteri speciali rimossi  
 - Spazi → trattini
 
-## 📝 Licenza
+## Licenza
 
 MIT License - Progetto open source per uso educativo e di ricerca.
 
-**⚠️ Importante**: Rispettare sempre i termini di servizio di MyMovies.it e utilizzare lo strumento responsabilmente.
+**Importante**: Rispettare sempre i termini di servizio di MyMovies.it e utilizzare lo strumento responsabilmente.
 
 ---
 
-## 🤝 Contributi
+## Contributi
 
 Contributi benvenuti! Per bug report o feature request:
 1. Apri una [Issue](https://github.com/ripolissimogit/mymovies_extractor/issues)
@@ -272,6 +272,6 @@ Contributi benvenuti! Per bug report o feature request:
 
 ---
 
-*📅 Ultimo aggiornamento: Settembre 2025*
-*🤖 Sviluppato con [Claude Code](https://claude.ai/code)*
-*⭐ Se il progetto ti è utile, lascia una stella su GitHub!*
+*Ultimo aggiornamento: Settembre 2025*
+*Sviluppato con [Claude Code](https://claude.ai/code)*
+*Se il progetto ti e' utile, lascia una stella su GitHub!*

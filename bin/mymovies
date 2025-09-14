@@ -7,7 +7,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 
 show_help() {
-    echo "🎬 MyMovies.it Review Extractor"
+    echo "MyMovies.it Review Extractor"
     echo ""
     echo "Usage:"
     echo "  mymovies \"Titolo Film\" Anno [opzioni]"
@@ -33,7 +33,7 @@ if [ $# -eq 0 ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 fi
 
 if [ $# -lt 2 ]; then
-    echo "❌ Errore: Titolo e anno richiesti"
+    echo "ERRORE: Titolo e anno richiesti"
     echo "Usa: mymovies --help per maggiori informazioni"
     exit 1
 fi
@@ -44,7 +44,7 @@ shift 2  # Rimuovi titolo e anno dagli argomenti
 
 # Controlla che l'anno sia valido
 if ! [[ "$YEAR" =~ ^[0-9]{4}$ ]] || [ "$YEAR" -lt 1900 ] || [ "$YEAR" -gt 2030 ]; then
-    echo "❌ Errore: Anno non valido ($YEAR)"
+    echo "ERRORE: Anno non valido ($YEAR)"
     echo "Deve essere un anno tra 1900 e 2030"
     exit 1
 fi
@@ -66,7 +66,7 @@ while [ $# -gt 0 ]; do
             NO_SAVE=true
             ;;
         *)
-            echo "❌ Opzione sconosciuta: $1"
+            echo "ERRORE: Opzione sconosciuta: $1"
             echo "Usa: mymovies --help per maggiori informazioni"
             exit 1
             ;;
@@ -76,18 +76,18 @@ done
 
 # Controlla che Node.js sia installato
 if ! command -v node &> /dev/null; then
-    echo "❌ Errore: Node.js non è installato"
+    echo "ERRORE: Node.js non e' installato"
     echo "Installa Node.js da: https://nodejs.org"
     exit 1
 fi
 
 # Controlla che Puppeteer sia installato
 if [ ! -d "$PROJECT_DIR/node_modules/puppeteer" ]; then
-    echo "⚠️  Puppeteer non installato, installazione in corso..."
+    echo "Puppeteer non installato, installazione in corso..."
     cd "$PROJECT_DIR"
     npm install puppeteer
     if [ $? -ne 0 ]; then
-        echo "❌ Errore durante installazione di Puppeteer"
+        echo "ERRORE durante installazione di Puppeteer"
         exit 1
     fi
 fi

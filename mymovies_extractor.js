@@ -186,30 +186,30 @@ function saveReviewWithLog(result) {
     }
 
     // Costruisci contenuto con timestamp e log
-    const content = `📅 ESTRATTO IL: ${timestampStr}
+    const content = `ESTRATTO IL: ${timestampStr}
 
-🎬 ${result.review.title || title} (${year})
-👤 ${result.review.author || 'Autore sconosciuto'}
-📅 ${result.review.date || 'Data non disponibile'}
-📊 ${result.metadata.contentLength} caratteri
+${result.review.title || title} (${year})
+Autore: ${result.review.author || 'Autore sconosciuto'}
+Data: ${result.review.date || 'Data non disponibile'}
+Lunghezza: ${result.metadata.contentLength} caratteri
 
-📖 RECENSIONE:
+RECENSIONE:
 ================================================================================
 ${result.review.content}
 ================================================================================
 
-📋 LOG ESTRAZIONE:
+LOG ESTRAZIONE:
 ================================================================================
-🌐 URL: ${result.url}
-⏱️  Tempo elaborazione: ${result.metadata.processingTime}ms
-🔧 Metodo estrazione: ${result.metadata.extractionMethod}
-📏 Parole: ${result.metadata.wordCount}
-💾 File: ${fileName}
-🕐 Timestamp: ${timestamp.toISOString()}
-🖥️  User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36
-🔍 Selettori utilizzati: p.corpo, .corpo, #recensione
-📱 Viewport: Default Puppeteer
-🌍 Lingua: Italiano
+URL: ${result.url}
+Tempo elaborazione: ${result.metadata.processingTime}ms
+Metodo estrazione: ${result.metadata.extractionMethod}
+Parole: ${result.metadata.wordCount}
+File: ${fileName}
+Timestamp: ${timestamp.toISOString()}
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36
+Selettori utilizzati: p.corpo, .corpo, #recensione
+Viewport: Default Puppeteer
+Lingua: Italiano
 ================================================================================
 `;
 
@@ -259,8 +259,8 @@ async function extractMovieReview(title, year, options = {}) {
         const url = buildMyMoviesURL(title, year);
         result.url = url;
         
-        console.log(`🎬 Estrazione recensione: "${title}" (${year})`);
-        console.log(`🌐 URL: ${url}`);
+        console.log(`Estrazione recensione: "${title}" (${year})`);
+        console.log(`URL: ${url}`);
         
         let fullHTML = '';
         
@@ -271,7 +271,7 @@ async function extractMovieReview(title, year, options = {}) {
                 try {
                     fullHTML = await response.text();
                 } catch (e) {
-                    console.log('⚠️ Errore cattura HTML:', e.message);
+                    console.log('ATTENZIONE: Errore cattura HTML:', e.message);
                 }
             }
         });
@@ -290,7 +290,7 @@ async function extractMovieReview(title, year, options = {}) {
         let metadata = { author: null, date: null, title: null };
         if (fullHTML) {
             metadata = extractMetadata(fullHTML);
-            console.log('📊 Metadata estratti:', metadata);
+            console.log('Metadata estratti:', metadata);
         }
         
         // Estrai contenuto recensione
@@ -373,7 +373,7 @@ async function extractMovieReview(title, year, options = {}) {
             if (!options.noSave) {
                 const savedPath = saveReviewWithLog(result);
                 if (savedPath) {
-                    console.log(`💾 File salvato: ${path.basename(savedPath)}`);
+                    console.log(`File salvato: ${path.basename(savedPath)}`);
                     result.filePath = savedPath;
                 }
             }
@@ -430,27 +430,27 @@ async function main() {
         } else {
             if (result.success) {
                 console.log('\n' + '='.repeat(80));
-                console.log(`🎬 ${result.review.title || title} (${year})`);
+                console.log(`${result.review.title || title} (${year})`);
                 console.log('='.repeat(80));
                 
                 if (result.review.author) {
-                    console.log(`👤 Autore: ${result.review.author}`);
+                    console.log(`Autore: ${result.review.author}`);
                 }
                 if (result.review.date) {
-                    console.log(`📅 Data: ${result.review.date}`);
+                    console.log(`Data: ${result.review.date}`);
                 }
                 
-                console.log(`📊 Lunghezza: ${result.metadata.contentLength} caratteri`);
-                console.log(`⏱️  Tempo: ${result.metadata.processingTime}ms`);
-                console.log(`🔧 Metodo: ${result.metadata.extractionMethod}`);
-                
-                console.log('\n📖 RECENSIONE:');
+                console.log(`Lunghezza: ${result.metadata.contentLength} caratteri`);
+                console.log(`Tempo: ${result.metadata.processingTime}ms`);
+                console.log(`Metodo: ${result.metadata.extractionMethod}`);
+
+                console.log('\nRECENSIONE:');
                 console.log('-'.repeat(80));
                 console.log(result.review.content);
                 console.log('-'.repeat(80));
             } else {
-                console.log(`❌ Errore: ${result.error}`);
-                console.log(`🌐 URL tentato: ${result.url}`);
+                console.log(`ERRORE: ${result.error}`);
+                console.log(`URL tentato: ${result.url}`);
             }
         }
         

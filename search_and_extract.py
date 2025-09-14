@@ -17,7 +17,7 @@ class TMDBMovieSearch:
         self.base_url = "https://api.themoviedb.org/3"
         
         if not self.api_key:
-            print("❌ TMDB API Key richiesta!")
+            print("ERRORE: TMDB API Key richiesta!")
             print("Imposta TMDB_API_KEY come variabile d'ambiente o passa come parametro")
             print("Get API key from: https://www.themoviedb.org/settings/api")
             sys.exit(1)
@@ -57,7 +57,7 @@ class TMDBMovieSearch:
             return movies
             
         except requests.exceptions.RequestException as e:
-            print(f"❌ Errore nella ricerca TMDB: {e}")
+            print(f"ERRORE: Errore nella ricerca TMDB: {e}")
             return []
     
     def get_movie_details(self, movie_id):
@@ -97,7 +97,7 @@ class MyMoviesExtractor:
         self.ai_wrapper = os.path.join(script_dir, 'ai_wrapper.sh')
         
         if not os.path.exists(self.ai_wrapper):
-            print(f"❌ Script ai_wrapper.sh non trovato in {self.ai_wrapper}")
+            print(f"ERRORE: Script ai_wrapper.sh non trovato in {self.ai_wrapper}")
             sys.exit(1)
     
     def check_film_exists(self, title, year):
@@ -131,16 +131,16 @@ class MyMoviesExtractor:
 def print_movie_list(movies):
     """Stampa lista film formattata"""
     print("\n" + "="*80)
-    print("🎬 RISULTATI RICERCA FILM")
+    print("RISULTATI RICERCA FILM")
     print("="*80)
     
     for i, movie in enumerate(movies, 1):
-        print(f"\n{i}. 📽️  {movie['title']} ({movie['year']})")
+        print(f"\n{i}. {movie['title']} ({movie['year']})")
         if movie['original_title'] != movie['title']:
-            print(f"   📝 Titolo originale: {movie['original_title']}")
-        print(f"   🎭 Regia: {movie['director']}")
-        print(f"   ⭐ Voto TMDB: {movie['vote_average']}/10")
-        print(f"   📖 {movie['overview']}")
+            print(f"   Titolo originale: {movie['original_title']}")
+        print(f"   Regia: {movie['director']}")
+        print(f"   Voto TMDB: {movie['vote_average']}/10")
+        print(f"   {movie['overview']}")
     
     print("\n" + "="*80)
 
@@ -148,7 +148,7 @@ def get_user_choice(max_num):
     """Ottiene scelta utente con opzioni aggiuntive"""
     while True:
         try:
-            choice = input(f"\n🎯 Scegli film (1-{max_num}), 'r' per ripetere ricerca, o 'q' per uscire: ").strip().lower()
+            choice = input(f"\nScegli film (1-{max_num}), 'r' per ripetere ricerca, o 'q' per uscire: ").strip().lower()
 
             if choice == 'q' or choice == 'quit':
                 return 'quit'
@@ -160,12 +160,12 @@ def get_user_choice(max_num):
             if 1 <= choice_num <= max_num:
                 return choice_num - 1  # Return 0-based index
             else:
-                print(f"❌ Inserisci un numero tra 1 e {max_num}")
+                print(f"ERRORE: Inserisci un numero tra 1 e {max_num}")
 
         except ValueError:
-            print("❌ Inserisci un numero valido, 'r' per ripetere ricerca, o 'q' per uscire")
+            print("ERRORE: Inserisci un numero valido, 'r' per ripetere ricerca, o 'q' per uscire")
         except KeyboardInterrupt:
-            print("\n👋 Uscita...")
+            print("\nUscita...")
             return 'quit'
 
 def show_review_file(title, year):
@@ -196,24 +196,24 @@ def show_review_file(title, year):
     filepath = os.path.join('reviews', filename)
 
     if os.path.exists(filepath):
-        print(f"\n📄 RECENSIONE: {title} ({year})")
+        print(f"\nRECENSIONE: {title} ({year})")
         print("="*80)
         try:
             with open(filepath, 'r', encoding='utf-8') as f:
                 content = f.read()
                 print(content)
         except Exception as e:
-            print(f"❌ Errore lettura file: {e}")
+            print(f"ERRORE: Errore lettura file: {e}")
     else:
-        print(f"❌ File recensione non trovato: {filename}")
+        print(f"ERRORE: File recensione non trovato: {filename}")
 
 def get_post_extraction_choice():
     """Menu dopo estrazione completata"""
-    print(f"\n🎉 Cosa vuoi fare ora?")
-    print(f"  v) 📖 Visualizza recensione estratta")
-    print(f"  u) 🔄 Scegli altro film dall'elenco precedente")
-    print(f"  r) 🔍 Nuova ricerca")
-    print(f"  q) 👋 Esci")
+    print(f"\nCosa vuoi fare ora?")
+    print(f"  v) Visualizza recensione estratta")
+    print(f"  u) Scegli altro film dall'elenco precedente")
+    print(f"  r) Nuova ricerca")
+    print(f"  q) Esci")
 
     while True:
         try:
@@ -228,18 +228,18 @@ def get_post_extraction_choice():
             elif choice in ['q', 'quit']:
                 return 'quit'
             else:
-                print("❌ Opzioni valide: v (visualizza), u (altro film), r (nuova ricerca), q (esci)")
+                print("ERRORE: Opzioni valide: v (visualizza), u (altro film), r (nuova ricerca), q (esci)")
 
         except KeyboardInterrupt:
-            print("\n👋 Uscita...")
+            print("\nUscita...")
             return 'quit'
 
 def get_extraction_confirmation(title, year):
     """Chiede conferma per estrazione con opzione di tornare indietro"""
-    print(f"\n🚀 Vuoi estrarre la recensione di '{title} ({year})'?")
-    print(f"  s) ✅ Sì, estrai la recensione")
-    print(f"  n) ❌ No, torna alla ricerca")
-    print(f"  u) 🔙 Torna alla lista film")
+    print(f"\nVuoi estrarre la recensione di '{title} ({year})'?")
+    print(f"  s) Si, estrai la recensione")
+    print(f"  n) No, torna alla ricerca")
+    print(f"  u) Torna alla lista film")
 
     while True:
         try:
@@ -252,14 +252,14 @@ def get_extraction_confirmation(title, year):
             elif choice in ['u', 'up', 'back']:
                 return 'back_to_list'
             else:
-                print("❌ Opzioni valide: s (sì), n (nuova ricerca), u (torna alla lista)")
+                print("ERRORE: Opzioni valide: s (si), n (nuova ricerca), u (torna alla lista)")
 
         except KeyboardInterrupt:
-            print("\n👋 Uscita...")
+            print("\nUscita...")
             return 'quit'
 
 def main():
-    print("🎬 MyMovies Smart Search & Extract")
+    print("MyMovies Smart Search & Extract")
     print("="*50)
     
     # Setup
@@ -268,12 +268,12 @@ def main():
     # Controlla API key
     api_key = os.getenv('TMDB_API_KEY')
     if not api_key:
-        print("\n🔑 TMDB API Key Setup:")
+        print("\nTMDB API Key Setup:")
         print("1. Vai su https://www.themoviedb.org/settings/api")
         print("2. Crea account e ottieni API key")
         print("3. Esporta la key:")
         print("   export TMDB_API_KEY='your_api_key_here'")
-        print("\n💡 Oppure passa la key come argomento:")
+        print("Oppure passa la key come argomento:")
         print("   python3 search_and_extract.py --api-key YOUR_KEY")
         
         # Check se passata come argomento
@@ -292,23 +292,23 @@ def main():
         while True:
             # Input ricerca (può essere saltato se si torna alla selezione film)
             if not current_movies:  # Solo se non abbiamo film da mostrare
-                query = input("\n🔍 Cerca film (o 'quit' per uscire): ").strip()
+                query = input("\nCerca film (o 'quit' per uscire): ").strip()
 
                 if query.lower() in ['quit', 'q', 'exit']:
                     print("👋 Arrivederci!")
                     break
 
                 if not query:
-                    print("❌ Inserisci un titolo da cercare")
+                    print("ERRORE: Inserisci un titolo da cercare")
                     continue
 
-                print(f"\n🔍 Ricerca '{query}' su TMDB...")
+                print(f"\nRicerca '{query}' su TMDB...")
 
                 # Cerca film
                 current_movies = tmdb.search_movies(query)
 
                 if not current_movies:
-                    print("❌ Nessun film trovato. Prova con un altro titolo.")
+                    print("ERRORE: Nessun film trovato. Prova con un altro titolo.")
                     continue
 
             # Mostra risultati (sempre se abbiamo film)
@@ -333,50 +333,50 @@ def main():
             title = selected_movie['title']
             year = selected_movie['year']
             
-            print(f"\n🎯 Hai scelto: {title} ({year})")
-            print(f"   🎭 Regia: {selected_movie['director']}")
+            print(f"\nHai scelto: {title} ({year})")
+            print(f"   Regia: {selected_movie['director']}")
             
             # Controlla esistenza su MyMovies
-            print(f"\n🔍 Controllo disponibilità su MyMovies.it...")
+            print(f"\nControllo disponibilita su MyMovies.it...")
             
             if not extractor.check_film_exists(title, year):
-                print(f"❌ '{title} ({year})' non trovato su MyMovies.it")
+                print(f"ERRORE: '{title} ({year})' non trovato su MyMovies.it")
                 
                 # Prova con titolo originale se diverso
                 if selected_movie['original_title'] != title:
-                    print(f"🔄 Tentativo con titolo originale: {selected_movie['original_title']}")
+                    print(f"Tentativo con titolo originale: {selected_movie['original_title']}")
                     if extractor.check_film_exists(selected_movie['original_title'], year):
                         title = selected_movie['original_title']
-                        print(f"✅ Trovato con titolo originale!")
+                        print(f"Trovato con titolo originale!")
                     else:
-                        print(f"❌ Non trovato neanche con titolo originale")
+                        print(f"ERRORE: Non trovato neanche con titolo originale")
                         continue
                 else:
                     continue
             else:
-                print(f"✅ Film trovato su MyMovies.it!")
+                print(f"Film trovato su MyMovies.it!")
             
             # Conferma estrazione con opzioni
             confirmation = get_extraction_confirmation(title, year)
 
             if confirmation == 'extract':
-                print(f"\n⏳ Estrazione recensione di '{title} ({year})'...")
-                print("📝 Questo potrebbe richiedere 30-60 secondi...")
+                print(f"\nEstrazione recensione di '{title} ({year})'...")
+                print("Questo potrebbe richiedere 30-60 secondi...")
                 
                 # Estrai recensione
                 result = extractor.extract_review(title, year)
                 
                 if result.get('status') == 'success':
-                    print(f"\n🎉 ESTRAZIONE COMPLETATA!")
-                    print(f"📽️  Film: {result.get('title', title)} ({year})")
-                    print(f"👤 Autore: {result.get('author', 'N/A')}")
-                    print(f"📅 Data: {result.get('date', 'N/A')}")
-                    print(f"📏 Lunghezza: {result.get('content_length', 0)} caratteri")
+                    print(f"\nESTRAZIONE COMPLETATA!")
+                    print(f"Film: {result.get('title', title)} ({year})")
+                    print(f"Autore: {result.get('author', 'N/A')}")
+                    print(f"Data: {result.get('date', 'N/A')}")
+                    print(f"Lunghezza: {result.get('content_length', 0)} caratteri")
                     
                     if result.get('file_path'):
-                        print(f"💾 Salvato in: {os.path.basename(result['file_path'])}")
+                        print(f"Salvato in: {os.path.basename(result['file_path'])}")
                     
-                    print(f"\n✨ Recensione estratta con successo!")
+                    print(f"\nRecensione estratta con successo!")
 
                     # Menu post-estrazione
                     while True:
@@ -400,7 +400,7 @@ def main():
                             return
 
                 else:
-                    print(f"\n❌ Errore estrazione: {result.get('message', 'Unknown error')}")
+                    print(f"\nERRORE estrazione: {result.get('message', 'Unknown error')}")
 
             elif confirmation == 'new_search':
                 # Reset per nuova ricerca
@@ -418,9 +418,9 @@ def main():
             print(f"\n" + "="*50)
     
     except KeyboardInterrupt:
-        print(f"\n👋 Uscita forzata. Arrivederci!")
+        print(f"\nUscita forzata. Arrivederci!")
     except Exception as e:
-        print(f"💥 Errore imprevisto: {e}")
+        print(f"ERRORE imprevisto: {e}")
 
 if __name__ == "__main__":
     main()

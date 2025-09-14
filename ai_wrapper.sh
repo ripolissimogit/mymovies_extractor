@@ -185,10 +185,10 @@ extract_film() {
             fi
         else
             # Parse text output
-            author=$(grep "👤 Autore:" "$temp_file" | sed 's/👤 Autore: //' 2>/dev/null)
-            date=$(grep "📅 Data:" "$temp_file" | sed 's/📅 Data: //' 2>/dev/null)
-            content_length=$(grep "📊 Lunghezza:" "$temp_file" | grep -o '[0-9]*' | head -1 2>/dev/null)
-            file_path=$(grep "💾 File salvato" "$temp_file" | sed 's/.*: //' 2>/dev/null)
+            author=$(grep "Autore:" "$temp_file" | sed 's/Autore: //' 2>/dev/null)
+            date=$(grep "Data:" "$temp_file" | sed 's/Data: //' 2>/dev/null)
+            content_length=$(grep "Lunghezza:" "$temp_file" | grep -o '[0-9]*' | head -1 2>/dev/null)
+            file_path=$(grep "File salvato" "$temp_file" | sed 's/.*: //' 2>/dev/null)
         fi
         
         [ -z "$content_length" ] && content_length=0
@@ -197,7 +197,7 @@ extract_film() {
         rm -f "$temp_file"
         return 0
     else
-        local error_msg=$(cat "$temp_file" | grep -o "❌ Errore:.*" | head -1 | sed 's/❌ Errore: //')
+        local error_msg=$(cat "$temp_file" | grep -o "ERRORE:.*" | head -1 | sed 's/ERRORE: //')
         [ -z "$error_msg" ] && error_msg="Unknown extraction error"
         
         output_result "error" "$title" "$year" "$error_msg" "" "0" "" ""
