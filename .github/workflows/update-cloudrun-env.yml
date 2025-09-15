@@ -1,0 +1,43 @@
+name: Update Cloud Run Env (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      service:
+        description: Cloud Run service name
+        required: true
+        default: mymovies-api
+      region:
+        description: GCP region
+        required: true
+        default: europe-west8
+      envPairs:
+        description: Comma-separated KEY=VALUE pairs (e.g., GCS_BUCKET=mymovies-reviews,PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium)
+        required: true
+
+jobs:
+  update-env:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          export_default_credentials: true
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GOOGLE_CLOUD_CREDENTIALS }}
+
+      - name: Update Cloud Run env
+        run: |
+          SERVICE="${{ github.event.inputs.service }}"
+          REGION="${{ github.event.inputs.region }}"
+          ENVS="${{ github.event.inputs.envPairs }}"
+          echo "Updating env for service: $SERVICE in region: $REGION"
+          gcloud run services update "$SERVICE" --region "$REGION" --set-env-vars="$ENVS"
+
