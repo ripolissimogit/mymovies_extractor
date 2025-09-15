@@ -221,6 +221,47 @@ L'extractor utilizza **intercettazione della response HTML** invece del DOM pars
 
 ## Performance & Statistiche
 
+## MCP Server Integration
+
+L'API include un endpoint MCP (Model Context Protocol) per integrazione diretta con AI assistants:
+
+- **Endpoint**: `GET/POST /mcp` 
+- **Protocollo**: Server-Sent Events (SSE) per streaming
+- **URL**: `https://mymovies-api-61434647155.europe-west8.run.app/mcp`
+
+### Tool MCP Disponibili
+
+- `checkServerHealth` → Verifica stato server
+- `getApiInformation` → Info API e endpoints  
+- `listApiReviews` → Lista recensioni estratte
+- `extractSingleReview` → Estrazione recensione singola
+  - Parametri: `{ title: string, year: number, options?: object }`
+
+### Configurazione Client
+
+**Cursor/Claude Desktop/ChatGPT Developer:**
+```json
+{
+  "mcpServers": {
+    "mymovies": {
+      "command": "curl",
+      "args": ["-N", "https://mymovies-api-61434647155.europe-west8.run.app/mcp"]
+    }
+  }
+}
+```
+
+**Test manuale:**
+```bash
+# Apri stream SSE
+curl -N https://mymovies-api-61434647155.europe-west8.run.app/mcp
+
+# Invoca tool (in altro terminale)
+curl -X POST https://mymovies-api-61434647155.europe-west8.run.app/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"id":"test-1","method":"extractSingleReview","params":{"title":"Oppenheimer","year":2023}}'
+```
+
 ## Deploy Cloud Run (Automazione)
 
 - Script locale: `scripts/deploy-cloudrun.sh`
