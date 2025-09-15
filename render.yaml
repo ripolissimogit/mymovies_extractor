@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: mymovies-api
+    env: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    autoDeploy: true
+    numInstances: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+    disk:
+      name: reviews
+      mountPath: /app/reviews
+      sizeGB: 1

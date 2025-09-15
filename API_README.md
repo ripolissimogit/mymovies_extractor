@@ -320,7 +320,8 @@ L'API può essere facilmente integrata in:
 
 ## Documentazione Completa
 
-Visita `/api/docs` per la documentazione completa in formato Markdown.
+- Visita `/api/docs` per la documentazione completa in formato Markdown.
+- Spec OpenAPI JSON: `/api/openapi.json` (può essere importata in strumenti come Swagger UI, Postman o Tadata per generare un MCP)
 
 ## Supporto
 

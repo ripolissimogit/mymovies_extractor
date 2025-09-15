@@ -1,0 +1,9 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+.fetch
+*.local
+*.log
+tmp
+reviews/*.txt

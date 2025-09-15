@@ -504,6 +504,28 @@ Tutti gli errori seguono il formato:
     res.send(docs);
 });
 
+// OpenAPI JSON endpoint
+app.get('/api/openapi.json', (req, res) => {
+    try {
+        const specPath = path.join(__dirname, 'openapi.json');
+        if (!fs.existsSync(specPath)) {
+            return res.status(404).json({
+                error: 'Not Found',
+                message: 'OpenAPI spec non trovata'
+            });
+        }
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        const data = fs.readFileSync(specPath, 'utf8');
+        res.send(data);
+    } catch (error) {
+        console.error('OpenAPI serve error:', error);
+        res.status(500).json({
+            error: 'Internal Server Error',
+            message: 'Errore nel servire la specifica OpenAPI'
+        });
+    }
+});
+
 // Error handler globale
 app.use((error, req, res, next) => {
     console.error('Unhandled error:', error);
@@ -538,6 +560,14 @@ app.listen(PORT, () => {
     console.log(`Health check: http://localhost:${PORT}/health`);
     console.log(`API Info: http://localhost:${PORT}/api/info`);
     console.log(`Documentation: http://localhost:${PORT}/api/docs`);
+    // Tentativo opzionale di deploy MCP via Tadata SDK (se configurato)
+    try {
+        const { deployMCP } = require('./tadata-mcp');
+        // Esegue in background; non blocca l'avvio del server
+        Promise.resolve(deployMCP()).catch(() => {});
+    } catch (_) {
+        // Ignora se modulo assente
+    }
 });
 
 module.exports = app;
