@@ -1,5 +1,7 @@
 # MyMovies.it Review Extractor
 
+![Deploy](https://github.com/ripolissimogit/mymovies_extractor/actions/workflows/deploy-cloudrun.yml/badge.svg)
+
 🎬 **Strumento completo per estrarre recensioni da MyMovies.it con ricerca interattiva e logging avanzato**
 
 Utilizza Puppeteer per superare le limitazioni dell'architettura AMP e include integrazione TMDB per ricerca intelligente dei film.
@@ -218,6 +220,27 @@ L'extractor utilizza **intercettazione della response HTML** invece del DOM pars
 4. **Valida** la qualità del testo estratto
 
 ## Performance & Statistiche
+
+## Deploy Cloud Run (Automazione)
+
+- Script locale: `scripts/deploy-cloudrun.sh`
+  - Parametri via env o argomenti (ordine): `PROJECT_ID REGION SERVICE IMAGE_REPO IMAGE_NAME`
+  - Esempio:
+    - `PROJECT_ID=workspace-mcp-682108 REGION=europe-west8 ./scripts/deploy-cloudrun.sh`
+
+- GitHub Actions: deploy continuo su branch `api-server`
+  - Workflow: `.github/workflows/deploy-cloudrun.yml`
+  - Configurazione repo (Settings → Secrets and variables → Actions):
+    - Secrets: `GOOGLE_CLOUD_CREDENTIALS` (JSON key account di deploy)
+    - Variables: `GCP_PROJECT_ID=workspace-mcp-682108`, `GCP_REGION=europe-west8`
+
+- GitHub Actions: aggiornamento variabili d'ambiente (manuale)
+  - Workflow: `.github/workflows/update-cloudrun-env.yml`
+  - Avvio manuale da GitHub → Actions → "Update Cloud Run Env (manual)"
+  - Input:
+    - `service` (default: `mymovies-api`)
+    - `region` (default: `europe-west8`)
+    - `envPairs` (es: `GCS_BUCKET=mymovies-reviews,PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium`)
 
 - **Tasso di successo**: >95% su film con recensioni pubblicate
 - **Tempo medio**: 4-6 secondi per estrazione (più timeout)

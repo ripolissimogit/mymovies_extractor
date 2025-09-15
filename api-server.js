@@ -12,6 +12,19 @@ const { extractMovieReview } = require('./mymovies_extractor');
 const fs = require('fs');
 const path = require('path');
 
+// Google Cloud Storage setup
+let gcs = null;
+const GCS_BUCKET = process.env.GCS_BUCKET;
+if (GCS_BUCKET) {
+    try {
+        const { Storage } = require('@google-cloud/storage');
+        gcs = new Storage();
+        console.log(`✅ Google Cloud Storage inizializzato per bucket: ${GCS_BUCKET}`);
+    } catch (error) {
+        console.warn('⚠️ Google Cloud Storage non disponibile:', error.message);
+    }
+}
+
 const app = express();
 app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3000;
@@ -551,6 +564,32 @@ app.get('/api/openapi.json', (req, res) => {
             message: 'Errore nel servire la specifica OpenAPI'
         });
     }
+});
+
+// Swagger UI (minimal) to view OpenAPI spec
+app.get('/api/openapi.html', (req, res) => {
+    const html = `<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>OpenAPI Docs</title>
+    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.17.14/swagger-ui.css" />
+  </head>
+  <body>
+    <div id="swagger"></div>
+    <script src="https://unpkg.com/swagger-ui-dist@5.17.14/swagger-ui-bundle.js"></script>
+    <script>
+      window.onload = () => {
+        SwaggerUIBundle({
+          url: '/api/openapi.json',
+          dom_id: '#swagger'
+        });
+      };
+    </script>
+  </body>
+</html>`;
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.send(html);
 });
 
 // Error handler globale
