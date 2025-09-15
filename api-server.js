@@ -563,15 +563,7 @@ app.listen(PORT, () => {
     console.log(`Health check: http://localhost:${PORT}/health`);
     console.log(`API Info: http://localhost:${PORT}/api/info`);
     console.log(`Documentation: http://localhost:${PORT}/api/docs`);
-    // Tentativo opzionale di deploy MCP via Tadata SDK (se configurato e abilitato)
-    if (process.env.DEPLOY_TADATA_ON_START === 'true') {
-        try {
-            const { deployMCP } = require('./tadata-mcp');
-            Promise.resolve(deployMCP()).catch(() => {});
-        } catch (_) {
-            // Ignora se modulo assente
-        }
-    }
+    // MCP deploy disabilitato: integrazioni esterne rimosse
 });
 
 module.exports = app;

@@ -13,8 +13,6 @@ services:
         value: production
       - key: REVIEWS_DIR
         value: /app/reviews
-      - key: DEPLOY_TADATA_ON_START
-        value: "false"
     disk:
       name: reviews
       mountPath: /app/reviews
