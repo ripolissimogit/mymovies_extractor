@@ -270,14 +270,22 @@ async function extractMovieReview(title, year, options = {}) {
         error: null
     };
     
+    const defaultArgs = ['--no-sandbox', '--disable-setuid-sandbox'];
+    const extraArgs = process.env.PUPPETEER_ARGS
+        ? process.env.PUPPETEER_ARGS.split(/\s+/).filter(Boolean)
+        : [];
     const launchOptions = {
         headless: options.headless !== false,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        args: [...defaultArgs, ...extraArgs]
     };
     if (process.env.PUPPETEER_EXECUTABLE_PATH) {
         launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
     }
 
+    console.log('Puppeteer launching with:', {
+        executablePath: launchOptions.executablePath || 'bundled',
+        args: launchOptions.args
+    });
     const browser = await puppeteer.launch(launchOptions);
     
     try {
@@ -307,10 +315,12 @@ async function extractMovieReview(title, year, options = {}) {
         await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36');
         
         // Naviga alla pagina
+        console.log('Navigating to:', url);
         await page.goto(url, {
             waitUntil: 'domcontentloaded',
             timeout: 20000
         });
+        console.log('Navigation done');
         
         await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 3000)));
         
