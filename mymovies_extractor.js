@@ -4,6 +4,9 @@ const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
 
+// Directory recensioni configurabile (per hosting con filesystem effimero)
+const REVIEWS_DIR = process.env.REVIEWS_DIR || path.join(__dirname, 'reviews');
+
 /**
  * Normalizza il titolo del film per creare URL MyMovies validi
  */
@@ -177,7 +180,7 @@ function saveReviewWithLog(result) {
     // Normalizza nome file
     const normalizedTitle = normalizeFilmTitle(title);
     const fileName = `${normalizedTitle}_${year}_review.txt`;
-    const reviewsDir = path.join(__dirname, 'reviews');
+    const reviewsDir = REVIEWS_DIR;
     const filePath = path.join(reviewsDir, fileName);
 
     // Crea directory se non esiste

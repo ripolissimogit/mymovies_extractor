@@ -11,7 +11,5 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-    disk:
-      name: reviews
-      mountPath: /app/reviews
-      sizeGB: 1
+      - key: REVIEWS_DIR
+        value: /var/tmp/reviews

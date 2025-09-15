@@ -14,6 +14,7 @@ const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const REVIEWS_DIR = process.env.REVIEWS_DIR || path.join(__dirname, 'reviews');
 
 // Middleware
 app.use(express.json());
@@ -247,7 +248,7 @@ app.post('/api/extract/batch', async (req, res) => {
 // Lista recensioni estratte
 app.get('/api/reviews', (req, res) => {
     try {
-        const reviewsDir = path.join(__dirname, 'reviews');
+        const reviewsDir = REVIEWS_DIR;
 
         if (!fs.existsSync(reviewsDir)) {
             return res.json({
@@ -305,7 +306,7 @@ app.get('/api/reviews/:filename', (req, res) => {
             });
         }
 
-        const filePath = path.join(__dirname, 'reviews', filename);
+        const filePath = path.join(REVIEWS_DIR, filename);
 
         if (!fs.existsSync(filePath)) {
             return res.status(404).json({
@@ -362,7 +363,7 @@ app.get('/api/reviews/:filename', (req, res) => {
 // Statistiche
 app.get('/api/stats', (req, res) => {
     try {
-        const reviewsDir = path.join(__dirname, 'reviews');
+        const reviewsDir = REVIEWS_DIR;
 
         if (!fs.existsSync(reviewsDir)) {
             return res.json({

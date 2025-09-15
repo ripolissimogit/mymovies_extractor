@@ -8,7 +8,7 @@ Puppeteer richiede librerie di sistema per Chromium. Con Docker le includiamo ne
 ## Contenuti aggiunti
 - `Dockerfile`: immagine Node + librerie Chromium + `npm ci` + avvio `api-server.js`.
 - `.dockerignore`: evita di copiare asset inutili.
-- `render.yaml`: blueprint per creare il servizio Web su Render con disco persistente per `reviews/`.
+- `render.yaml`: blueprint per creare il servizio Web su Render. Per piano Free usa filesystem effimero (nessun `disk`).
 
 ## Passi
 1) Collega il repository a Render
@@ -16,9 +16,11 @@ Puppeteer richiede librerie di sistema per Chromium. Con Docker le includiamo ne
 
 2) Crea il servizio
 - Region: scegli vicina (es. Frankfurt)
-- Plan: Free o a pagamento (nota: il disco potrebbe richiedere piano a pagamento).
+- Plan: Free o a pagamento
 - Health check: già configurato su `/health`.
-- Disco: montato su `/app/reviews` (persistenza dei file estratti).
+- Storage:
+  - Free tier: nessun disco persistente. I file salvati in `REVIEWS_DIR` (default: `/var/tmp/reviews`) sono effimeri e possono sparire tra deploy/restart.
+  - A pagamento: puoi aggiungere un `disk` e impostare `REVIEWS_DIR` a un percorso montato (es. `/app/reviews`).
 
 3) Deploy
 - Render costruirà l’immagine e avvierà il servizio leggendo `PORT`.
@@ -31,7 +33,8 @@ Puppeteer richiede librerie di sistema per Chromium. Con Docker le includiamo ne
 - Se vuoi usare il Chromium di sistema, imposta `PUPPETEER_SKIP_DOWNLOAD=true` in build e aggiungi `executablePath` in `mymovies_extractor.js` al `puppeteer.launch`.
 
 5) Persistenza
-- I file di recensione vengono salvati in `reviews/` (montato su disco Render). Se cambi percorso, aggiorna `render.yaml` e `api-server.js` di conseguenza.
+- Free tier: file non persistenti. Il codice usa `REVIEWS_DIR` (di default `/var/tmp/reviews`) per scrivere; i dati possono andare persi ai redeploy.
+- Piano con disco: aggiungi un `disk` in `render.yaml` e imposta `REVIEWS_DIR` al mount path (es. `/app/reviews`).
 
 6) Variabili d’ambiente (opzionali)
 - `PORT`: gestita da Render automaticamente.
@@ -43,4 +46,3 @@ Puppeteer richiede librerie di sistema per Chromium. Con Docker le includiamo ne
 - 502/Bad Gateway: controlla che l’app legga `process.env.PORT` (già supportato) e che il servizio sia in `Healthy`.
 
 *** Buon deploy! ***
-
