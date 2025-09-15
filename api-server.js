@@ -86,8 +86,7 @@ app.get('/api/openapi.html', (req, res) => {
             ],
             plugins: [
                 SwaggerUIBundle.plugins.DownloadUrl
-            ],
-            layout: "StandaloneLayout"
+            ]
         });
     </script>
 </body>
