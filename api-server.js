@@ -247,33 +247,48 @@ app.post('/api/extract/batch', async (req, res) => {
     }
 });
 
-// Lista recensioni estratte
-app.get('/api/reviews', (req, res) => {
+// Lista recensioni estratte (supporta GCS se configurato)
+app.get('/api/reviews', async (req, res) => {
     try {
-        const reviewsDir = REVIEWS_DIR;
-
-        if (!fs.existsSync(reviewsDir)) {
-            return res.json({
-                reviews: [],
-                total: 0
-            });
+        if (gcs) {
+            const [entries] = await gcs.bucket(GCS_BUCKET).getFiles({ prefix: 'reviews/' });
+            const files = entries
+                .filter(f => f.name.endsWith('.txt'))
+                .map(f => {
+                    const file = f.name.split('/').pop();
+                    const match = file.match(/^(.+)_\d{4}_review\.txt$/) || file.match(/^(.+?)_(\d{4})_review\.txt$/);
+                    const title = match ? match[1].replace(/-/g, ' ') : file;
+                    const yearMatch = file.match(/_(\d{4})_review\.txt$/);
+                    const year = yearMatch ? parseInt(yearMatch[1]) : null;
+                    return {
+                        filename: file,
+                        title,
+                        year,
+                        size: Number(f.metadata.size || 0),
+                        modified: f.metadata.updated,
+                        downloadUrl: `/api/reviews/${file}`
+                    };
+                })
+                .sort((a, b) => new Date(b.modified) - new Date(a.modified));
+            return res.json({ reviews: files, total: files.length });
         }
 
+        const reviewsDir = REVIEWS_DIR;
+        if (!fs.existsSync(reviewsDir)) {
+            return res.json({ reviews: [], total: 0 });
+        }
         const files = fs.readdirSync(reviewsDir)
             .filter(file => file.endsWith('.txt'))
             .map(file => {
                 const filePath = path.join(reviewsDir, file);
                 const stats = fs.statSync(filePath);
-
-                // Parse filename per estrarre info
-                const match = file.match(/^(.+)_(\d{4})_review\.txt$/);
+                const match = file.match(/^(.+?)_(\d{4})_review\.txt$/);
                 const title = match ? match[1].replace(/-/g, ' ') : file;
                 const year = match ? parseInt(match[2]) : null;
-
                 return {
                     filename: file,
-                    title: title,
-                    year: year,
+                    title,
+                    year,
                     size: stats.size,
                     modified: stats.mtime.toISOString(),
                     downloadUrl: `/api/reviews/${file}`
@@ -281,10 +296,7 @@ app.get('/api/reviews', (req, res) => {
             })
             .sort((a, b) => new Date(b.modified) - new Date(a.modified));
 
-        res.json({
-            reviews: files,
-            total: files.length
-        });
+        res.json({ reviews: files, total: files.length });
 
     } catch (error) {
         console.error('Reviews list error:', error);
@@ -296,7 +308,8 @@ app.get('/api/reviews', (req, res) => {
 });
 
 // Download recensione specifica
-app.get('/api/reviews/:filename', (req, res) => {
+// Download recensione specifica (supporta GCS se configurato)
+app.get('/api/reviews/:filename', async (req, res) => {
     try {
         const filename = req.params.filename;
 
@@ -310,19 +323,22 @@ app.get('/api/reviews/:filename', (req, res) => {
 
         const filePath = path.join(REVIEWS_DIR, filename);
 
-        if (!fs.existsSync(filePath)) {
-            return res.status(404).json({
-                error: 'Not Found',
-                message: 'Recensione non trovata'
-            });
-        }
-
         // Determina formato output
         const format = req.query.format || 'text';
 
         if (format === 'json') {
             // Leggi e parsa il file per JSON
-            const content = fs.readFileSync(filePath, 'utf8');
+            let content = '';
+            if (gcs) {
+                const remotePath = `reviews/${filename}`;
+                const [buf] = await gcs.bucket(GCS_BUCKET).file(remotePath).download();
+                content = buf.toString('utf8');
+            } else {
+                if (!fs.existsSync(filePath)) {
+                    return res.status(404).json({ error: 'Not Found', message: 'Recensione non trovata' });
+                }
+                content = fs.readFileSync(filePath, 'utf8');
+            }
 
             // Parse semplice del contenuto
             const lines = content.split('\n');
@@ -350,7 +366,15 @@ app.get('/api/reviews/:filename', (req, res) => {
             // Ritorna testo plain
             res.setHeader('Content-Type', 'text/plain; charset=utf-8');
             res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-            res.sendFile(filePath);
+            if (gcs) {
+                const remotePath = `reviews/${filename}`;
+                const [buf] = await gcs.bucket(GCS_BUCKET).file(remotePath).download();
+                return res.send(buf.toString('utf8'));
+            }
+            if (!fs.existsSync(filePath)) {
+                return res.status(404).json({ error: 'Not Found', message: 'Recensione non trovata' });
+            }
+            return res.sendFile(filePath);
         }
 
     } catch (error) {

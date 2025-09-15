@@ -3,9 +3,21 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
+const { Storage } = require('@google-cloud/storage');
 
 // Directory recensioni configurabile (per hosting con filesystem effimero)
 const REVIEWS_DIR = process.env.REVIEWS_DIR || path.join(__dirname, 'reviews');
+const GCS_BUCKET = process.env.GCS_BUCKET || null;
+let gcs = null;
+if (GCS_BUCKET) {
+    try {
+        gcs = new Storage();
+        console.log('GCS abilitato, bucket:', GCS_BUCKET);
+    } catch (e) {
+        console.warn('Impossibile inizializzare Google Cloud Storage:', e.message);
+        gcs = null;
+    }
+}
 
 /**
  * Normalizza il titolo del film per creare URL MyMovies validi
@@ -162,7 +174,7 @@ function cleanReviewContent(rawContent, metadata) {
 /**
  * Salva recensione con timestamp e log
  */
-function saveReviewWithLog(result) {
+async function saveReviewWithLog(result) {
     if (!result.success) return null;
 
     const { title, year } = result.input;
@@ -217,8 +229,16 @@ Lingua: Italiano
 `;
 
     try {
-        fs.writeFileSync(filePath, content, 'utf8');
-        return filePath;
+        if (gcs) {
+            const bucket = gcs.bucket(GCS_BUCKET);
+            const remotePath = `reviews/${fileName}`;
+            await bucket.file(remotePath).save(content, { contentType: 'text/plain; charset=utf-8' });
+            console.log('File salvato su GCS:', `gs://${GCS_BUCKET}/${remotePath}`);
+            return `gs://${GCS_BUCKET}/${remotePath}`;
+        } else {
+            fs.writeFileSync(filePath, content, 'utf8');
+            return filePath;
+        }
     } catch (error) {
         console.error('❌ Errore salvataggio:', error.message);
         return null;
@@ -379,7 +399,7 @@ async function extractMovieReview(title, year, options = {}) {
 
             // Salva con timestamp e log (sempre, a meno che non sia specificato --no-save)
             if (!options.noSave) {
-                const savedPath = saveReviewWithLog(result);
+                const savedPath = await saveReviewWithLog(result);
                 if (savedPath) {
                     console.log(`File salvato: ${path.basename(savedPath)}`);
                     result.filePath = savedPath;
