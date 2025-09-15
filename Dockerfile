@@ -40,18 +40,21 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 
 WORKDIR /app
 
-# Change ownership to pptruser
-USER root
-RUN chown -R pptruser:pptruser /app
+# Create pptruser and reviews directory
+RUN groupadd -r pptruser && useradd -r -g pptruser -G audio,video pptruser \
+    && mkdir -p /home/pptruser/Downloads \
+    && mkdir -p /app/reviews \
+    && chown -R pptruser:pptruser /home/pptruser \
+    && chown -R pptruser:pptruser /app
+
 USER pptruser
 
 COPY package*.json ./
 
-# Skip Chromium download (base image already includes it)
+# Skip Chromium download (system Chromium installed)
 ENV PUPPETEER_SKIP_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 ENV NODE_ENV=production
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 
 RUN npm ci --omit=dev
 

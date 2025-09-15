@@ -318,7 +318,7 @@ async function extractMovieReview(title, year, options = {}) {
         console.log('Navigating to:', url);
         await page.goto(url, {
             waitUntil: 'domcontentloaded',
-            timeout: 20000
+            timeout: 60000
         });
         console.log('Navigation done');
         
