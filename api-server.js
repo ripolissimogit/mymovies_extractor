@@ -13,6 +13,7 @@ const fs = require('fs');
 const path = require('path');
 
 const app = express();
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3000;
 const REVIEWS_DIR = process.env.REVIEWS_DIR || path.join(__dirname, 'reviews');
 
@@ -30,6 +31,7 @@ const limiter = rateLimit({
     },
     standardHeaders: true,
     legacyHeaders: false,
+    skip: (req) => req.path === '/health'
 });
 
 app.use(limiter);
@@ -561,13 +563,14 @@ app.listen(PORT, () => {
     console.log(`Health check: http://localhost:${PORT}/health`);
     console.log(`API Info: http://localhost:${PORT}/api/info`);
     console.log(`Documentation: http://localhost:${PORT}/api/docs`);
-    // Tentativo opzionale di deploy MCP via Tadata SDK (se configurato)
-    try {
-        const { deployMCP } = require('./tadata-mcp');
-        // Esegue in background; non blocca l'avvio del server
-        Promise.resolve(deployMCP()).catch(() => {});
-    } catch (_) {
-        // Ignora se modulo assente
+    // Tentativo opzionale di deploy MCP via Tadata SDK (se configurato e abilitato)
+    if (process.env.DEPLOY_TADATA_ON_START === 'true') {
+        try {
+            const { deployMCP } = require('./tadata-mcp');
+            Promise.resolve(deployMCP()).catch(() => {});
+        } catch (_) {
+            // Ignora se modulo assente
+        }
     }
 });
 
