@@ -108,17 +108,20 @@ app.get('/health', (req, res) => {
 app.get('/api/info', (req, res) => {
     res.json({
         name: 'MyMovies Extractor API',
-        version: '1.0.0',
+        version: '1.0.1',
         description: 'REST API per estrazione recensioni da MyMovies.it',
         endpoints: {
             'POST /api/extract': 'Estrae recensione singola',
             'POST /api/extract/batch': 'Estrazione batch multipla',
             'GET /api/reviews': 'Lista recensioni estratte',
             'GET /api/reviews/:filename': 'Download recensione specifica',
-            'GET /api/stats': 'Statistiche estrattore'
+            'GET /api/stats': 'Statistiche estrattore',
+            'GET /api/openapi.html': 'Swagger UI Documentation'
         },
         rate_limit: '30 richieste per minuto per IP',
-        documentation: '/api/docs'
+        documentation: `${req.protocol}://${req.get('host')}/api/openapi.html`,
+        swagger: `${req.protocol}://${req.get('host')}/api/openapi.html`,
+        repository: 'https://github.com/ripolissimogit/mymovies_extractor'
     });
 });
 
