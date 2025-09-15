@@ -11,6 +11,8 @@ const rateLimit = require('express-rate-limit');
 const { extractMovieReview } = require('./mymovies_extractor');
 const fs = require('fs');
 const path = require('path');
+const http = require('http');
+const https = require('https');
 
 // Google Cloud Storage setup
 let gcs = null;
@@ -606,6 +608,98 @@ app.get('/api/openapi.json', (req, res) => {
         });
     }
 });
+
+// Minimal MCP over SSE endpoint (same service)
+(() => {
+    const clients = new Set();
+
+    function getBaseUrl(req) {
+        if (process.env.API_BASE_URL) return process.env.API_BASE_URL;
+        const proto = (req.headers['x-forwarded-proto'] || req.protocol || 'https');
+        const host = req.headers['x-forwarded-host'] || req.get('host');
+        return `${proto}://${host}`;
+    }
+
+    function httpCall(method, urlStr, body) {
+        return new Promise((resolve, reject) => {
+            const url = new URL(urlStr);
+            const mod = url.protocol === 'https:' ? https : http;
+            const data = body ? Buffer.from(JSON.stringify(body)) : null;
+            const req = mod.request(url, {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(data ? { 'Content-Length': String(data.length) } : {})
+                }
+            }, (resp) => {
+                let chunks = '';
+                resp.on('data', c => chunks += c);
+                resp.on('end', () => {
+                    if (resp.statusCode >= 200 && resp.statusCode < 300) {
+                        try { resolve(JSON.parse(chunks)); } catch { resolve(chunks); }
+                    } else {
+                        reject(new Error(`HTTP ${resp.statusCode}: ${chunks}`));
+                    }
+                });
+            });
+            req.on('error', reject);
+            if (data) req.write(data);
+            req.end();
+        });
+    }
+
+    // Open SSE stream
+    app.get('/mcp', (req, res) => {
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        res.flushHeaders && res.flushHeaders();
+
+        clients.add(res);
+        const hello = { type: 'ready', tools: [
+            { name: 'checkServerHealth', params: {} },
+            { name: 'getApiInformation', params: {} },
+            { name: 'listApiReviews', params: {} },
+            { name: 'extractSingleReview', params: { title: 'string', year: 'number', options: 'object?' } }
+        ]};
+        res.write(`data: ${JSON.stringify(hello)}\n\n`);
+
+        req.on('close', () => {
+            clients.delete(res);
+            try { res.end(); } catch {}
+        });
+    });
+
+    // Accept tool calls
+    app.post('/mcp', express.json(), async (req, res) => {
+        const { id, method, params } = req.body || {};
+        res.json({ ok: true }); // immediate ack to caller
+
+        const msg = { id, method };
+        try {
+            const base = getBaseUrl(req);
+            let result;
+            if (method === 'checkServerHealth') {
+                result = await httpCall('GET', `${base}/health`);
+            } else if (method === 'getApiInformation') {
+                result = await httpCall('GET', `${base}/api/info`);
+            } else if (method === 'listApiReviews') {
+                result = await httpCall('GET', `${base}/api/reviews`);
+            } else if (method === 'extractSingleReview') {
+                const { title, year, options } = params || {};
+                result = await httpCall('POST', `${base}/api/extract`, { title, year, options });
+            } else {
+                throw new Error(`Unknown method: ${method}`);
+            }
+            msg.result = result;
+        } catch (error) {
+            msg.error = { message: error.message };
+        }
+        for (const sse of clients) {
+            try { sse.write(`data: ${JSON.stringify(msg)}\n\n`); } catch {}
+        }
+    });
+})();
 
 // Swagger UI (minimal) to view OpenAPI spec
 app.get('/api/openapi.html', (req, res) => {
