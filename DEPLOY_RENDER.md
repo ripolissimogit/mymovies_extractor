@@ -28,9 +28,10 @@ Puppeteer richiede librerie di sistema per Chromium. Con Docker le includiamo ne
   - `https://<dominio-render>/health`
   - `https://<dominio-render>/api/info`
 
-4) Note su Puppeteer
-- Il `Dockerfile` lascia a Puppeteer il download del suo Chromium in build.
-- Se vuoi usare il Chromium di sistema, imposta `PUPPETEER_SKIP_DOWNLOAD=true` in build e aggiungi `executablePath` in `mymovies_extractor.js` al `puppeteer.launch`.
+4) Note su Puppeteer (build più rapido)
+- Base image: ora usiamo `ghcr.io/puppeteer/puppeteer:latest` che include Chromium e dipendenze.
+- `Dockerfile` imposta `PUPPETEER_SKIP_DOWNLOAD=true` per evitare download extra.
+- Il codice usa `PUPPETEER_EXECUTABLE_PATH` se presente (supportato dalla base image) per lanciare Chromium.
 
 5) Persistenza
 - Con disco: i file sono persistenti su `/app/reviews` (dimensione configurabile in `render.yaml`).
