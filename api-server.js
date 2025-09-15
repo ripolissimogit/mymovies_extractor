@@ -657,10 +657,14 @@ app.get('/api/openapi.json', (req, res) => {
 
         clients.add(res);
         const hello = { type: 'ready', tools: [
-            { name: 'checkServerHealth', params: {} },
-            { name: 'getApiInformation', params: {} },
-            { name: 'listApiReviews', params: {} },
-            { name: 'extractSingleReview', params: { title: 'string', year: 'number', options: 'object?' } }
+            { name: 'checkServerHealth', params: {}, description: 'Check API server health status' },
+            { name: 'getApiInformation', params: {}, description: 'Get API information and available endpoints' },
+            { name: 'listApiReviews', params: {}, description: 'List all extracted movie reviews' },
+            { 
+                name: 'extractSingleReview', 
+                params: { title: 'string', year: 'number', options: 'object?' },
+                description: 'Extract movie review with detailed logs, metadata, and structured output including processing time, content stats, and storage info'
+            }
         ]};
         res.write(`data: ${JSON.stringify(hello)}\n\n`);
 
@@ -687,7 +691,32 @@ app.get('/api/openapi.json', (req, res) => {
                 result = await httpCall('GET', `${base}/api/reviews`);
             } else if (method === 'extractSingleReview') {
                 const { title, year, options } = params || {};
-                result = await httpCall('POST', `${base}/api/extract`, { title, year, options });
+                const extractResult = await httpCall('POST', `${base}/api/extract`, { title, year, options });
+                
+                // Enhance result with structured logging info
+                result = {
+                    ...extractResult,
+                    mcpEnhanced: true,
+                    extractionSummary: {
+                        film: `${extractResult.data?.title || title} (${extractResult.data?.year || year})`,
+                        contentLength: extractResult.data?.metadata?.contentLength || 0,
+                        wordCount: extractResult.data?.metadata?.wordCount || 0,
+                        processingTime: `${(extractResult.data?.metadata?.processingTime || 0) / 1000}s`,
+                        author: extractResult.data?.review?.author || 'N/A',
+                        date: extractResult.data?.review?.date || 'N/A',
+                        extractionMethod: extractResult.data?.metadata?.extractionMethod || 'N/A',
+                        cloudStoragePath: extractResult.data?.filePath || 'Not saved'
+                    },
+                    logs: [
+                        `🎬 Extracting review for: ${title} (${year})`,
+                        `📊 Content: ${extractResult.data?.metadata?.contentLength || 0} chars, ${extractResult.data?.metadata?.wordCount || 0} words`,
+                        `⏱️ Processing time: ${(extractResult.data?.metadata?.processingTime || 0) / 1000}s`,
+                        `👤 Author: ${extractResult.data?.review?.author || 'N/A'}`,
+                        `📅 Date: ${extractResult.data?.review?.date || 'N/A'}`,
+                        `💾 Storage: ${extractResult.data?.filePath ? 'Saved to Cloud Storage' : 'Local only'}`,
+                        `✅ Extraction completed successfully`
+                    ]
+                };
             } else {
                 throw new Error(`Unknown method: ${method}`);
             }
