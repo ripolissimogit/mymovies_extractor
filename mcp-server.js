@@ -5,7 +5,23 @@
  * Implementa il Model Context Protocol per Claude Desktop
  */
 
+// Imposta modalità silent per l'extractor
+process.env.MCP_SILENT = 'true';
+
 const { extractMovieReview } = require('./mymovies_extractor');
+
+// Disabilita tutti i log per output JSON pulito
+const originalConsole = { ...console };
+console.log = () => {};
+console.warn = () => {};
+console.error = () => {};
+console.info = () => {};
+console.debug = () => {};
+
+// Solo per errori critici in stderr
+const logError = (msg) => {
+  process.stderr.write(`[MCP ERROR] ${msg}\n`);
+};
 
 class MCPServer {
   constructor() {

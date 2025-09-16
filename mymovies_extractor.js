@@ -1,5 +1,12 @@
 #!/usr/bin/env node
 
+// Modalità silent per MCP (disabilita tutti i log)
+const SILENT_MODE = process.env.MCP_SILENT === 'true';
+
+const log = SILENT_MODE ? () => {} : console.log;
+const warn = SILENT_MODE ? () => {} : console.warn;
+const error = SILENT_MODE ? () => {} : console.error;
+
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
@@ -282,7 +289,7 @@ async function extractMovieReview(title, year, options = {}) {
         launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
     }
 
-    console.log('Puppeteer launching with:', {
+    log('Puppeteer launching with:', {
         executablePath: launchOptions.executablePath || 'bundled',
         args: launchOptions.args
     });
