@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "mymovies": {
+      "command": "node",
+      "args": ["/Users/claudioripoli/mymovies_extractor/mcp-server.js"],
+      "env": {
+        "MYMOVIES_API_URL": "https://mymovies-api-61434647155.europe-west8.run.app"
+      }
+    }
+  }
+}

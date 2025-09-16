@@ -2,9 +2,39 @@
 
 ![Deploy](https://github.com/ripolissimogit/mymovies_extractor/actions/workflows/deploy-cloudrun.yml/badge.svg)
 
-🎬 **Strumento completo per estrarre recensioni da MyMovies.it con ricerca interattiva e logging avanzato**
+🎬 **Strumento completo per estrarre recensioni da MyMovies.it con ricerca interattiva, logging avanzato e MCP Server integrato**
 
 Utilizza Puppeteer per superare le limitazioni dell'architettura AMP e include integrazione TMDB per ricerca intelligente dei film.
+
+## 🚀 **NUOVO: MCP Server Integrato**
+
+**Compatibile con Claude Desktop, Cursor, Amazon Q e tutti i client AI che supportano il Model Context Protocol!**
+
+### Quick Start MCP
+
+```bash
+# Installazione automatica per Claude Desktop
+./install-mcp.sh
+
+# Installazione globale NPM
+npm install -g ./mcp-standalone
+
+# Avvio manuale
+npm run mcp              # Stdio mode (Claude Desktop)
+npm run mcp:http         # HTTP mode (Cursor, Q, etc.)
+npm run mcp:test         # Test del server
+
+# Standalone
+mymovies-mcp             # Auto-detect mode
+mymovies-mcp --http      # HTTP + WebSocket mode
+```
+
+**Tools disponibili**:
+- `extract_movie_review` - Estrai recensioni con metadata completi
+- `list_reviews` - Lista recensioni estratte
+- `get_api_info` - Info server API
+
+📖 **Documentazione completa**: [MCP-README.md](MCP-README.md) | [Configurazioni client](mcp-configs.md)
 
 ## Installazione Rapida
 

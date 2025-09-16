@@ -1,0 +1,43 @@
+{
+  "name": "mymovies-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP Server for MyMovies.it review extraction - Compatible with Claude Desktop, Cursor, Q CLI",
+  "main": "mcp-server.js",
+  "bin": {
+    "mymovies-mcp": "./mcp-server.js"
+  },
+  "scripts": {
+    "start": "node mcp-server.js",
+    "start:http": "node mcp-server.js --http",
+    "test": "echo 'Testing MCP server...' && node test-mcp.js"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol", 
+    "claude-desktop",
+    "cursor",
+    "mymovies",
+    "movie-reviews",
+    "ai-tools"
+  ],
+  "author": "Claude Code",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ripolissimogit/mymovies_extractor"
+  },
+  "mcp": {
+    "transport": {
+      "stdio": true,
+      "http": true
+    },
+    "tools": [
+      "extract_movie_review",
+      "list_reviews", 
+      "get_api_info"
+    ]
+  }
+}

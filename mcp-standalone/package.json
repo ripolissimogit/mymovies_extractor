@@ -1,0 +1,61 @@
+{
+  "name": "@mymovies/mcp-server",
+  "version": "1.1.0",
+  "description": "Universal MCP Server for MyMovies.it review extraction - Compatible with Claude Desktop, Cursor, Amazon Q",
+  "main": "index.js",
+  "bin": {
+    "mymovies-mcp": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "start:http": "node index.js --http",
+    "start:ws": "node index.js --ws",
+    "test": "node test.js",
+    "install-claude": "node install-claude.js"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "claude-desktop",
+    "cursor",
+    "amazon-q",
+    "mymovies",
+    "movie-reviews",
+    "ai-tools",
+    "web-scraping"
+  ],
+  "author": "Claude Code <claude@anthropic.com>",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "dependencies": {
+    "ws": "^8.14.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ripolissimogit/mymovies_extractor"
+  },
+  "homepage": "https://github.com/ripolissimogit/mymovies_extractor#readme",
+  "bugs": {
+    "url": "https://github.com/ripolissimogit/mymovies_extractor/issues"
+  },
+  "mcp": {
+    "version": "2024-11-05",
+    "transports": ["stdio", "http", "websocket"],
+    "tools": [
+      {
+        "name": "extract_movie_review",
+        "description": "Extract movie review from MyMovies.it"
+      },
+      {
+        "name": "list_reviews", 
+        "description": "List extracted reviews"
+      },
+      {
+        "name": "get_api_info",
+        "description": "Get API information"
+      }
+    ]
+  }
+}

@@ -1,7 +1,7 @@
 {
   "name": "mymovies-extractor",
-  "version": "1.0.0",
-  "description": "Tool per estrarre recensioni complete da MyMovies.it",
+  "version": "1.0.1",
+  "description": "Tool per estrarre recensioni complete da MyMovies.it con MCP Server integrato",
   "main": "mymovies_extractor.js",
   "scripts": {
     "extract": "node mymovies_extractor.js",
@@ -10,7 +10,11 @@
     "test": "node show_content.js \"Oppenheimer\" 2023",
     "api": "node api-server.js",
     "api:dev": "nodemon api-server.js",
-    "test:api": "node test-api.js"
+    "test:api": "node test-api.js",
+    "mcp": "node mcp-server.js",
+    "mcp:http": "node mcp-server.js --http",
+    "mcp:test": "node test-mcp.js",
+    "mcp:install": "./install-mcp.sh"
   },
   "keywords": [
     "mymovies",
@@ -18,16 +22,22 @@
     "reviews",
     "cinema",
     "puppeteer",
-    "amp"
+    "amp",
+    "mcp",
+    "model-context-protocol",
+    "claude-desktop",
+    "cursor",
+    "ai-tools"
   ],
   "author": "Claude Code",
   "license": "MIT",
   "dependencies": {
+    "@google-cloud/storage": "^7.13.0",
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "express-rate-limit": "^7.1.5",
     "puppeteer": "^21.0.0",
-    "@google-cloud/storage": "^7.13.0"
+    "ws": "^8.18.3"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
@@ -35,9 +45,22 @@
   "bin": {
     "mymovies-extract": "./mymovies_extractor.js",
     "mymovies-show": "./show_content.js",
-    "mymovies-debug": "./show_content_debug.js"
+    "mymovies-debug": "./show_content_debug.js",
+    "mymovies-mcp": "./mcp-server.js"
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "mcp": {
+    "server": "./mcp-server.js",
+    "transport": {
+      "stdio": true,
+      "http": true
+    },
+    "tools": [
+      "extract_movie_review",
+      "list_reviews",
+      "get_api_info"
+    ]
   }
 }

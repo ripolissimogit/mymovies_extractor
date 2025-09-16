@@ -608,7 +608,70 @@ app.get('/api/openapi.json', (req, res) => {
     }
 });
 
-// Minimal MCP over SSE endpoint (same service)
+// JSON-RPC MCP endpoint for Claude Desktop
+app.post('/mcp-jsonrpc', express.json(), async (req, res) => {
+    const { id, method, params } = req.body || {};
+    
+    try {
+        let result;
+        
+        switch (method) {
+            case 'initialize':
+                result = {
+                    protocolVersion: '2024-11-05',
+                    capabilities: { tools: {} },
+                    serverInfo: { name: 'mymovies-api', version: '1.0.1' }
+                };
+                break;
+                
+            case 'tools/list':
+                result = {
+                    tools: [
+                        {
+                            name: 'extract_movie_review',
+                            description: 'Extract movie review from MyMovies.it',
+                            inputSchema: {
+                                type: 'object',
+                                properties: {
+                                    title: { type: 'string' },
+                                    year: { type: 'number' }
+                                },
+                                required: ['title', 'year']
+                            }
+                        }
+                    ]
+                };
+                break;
+                
+            case 'tools/call':
+                if (params?.name === 'extract_movie_review') {
+                    const { title, year } = params.arguments || {};
+                    const extractResult = await extractMovieReview(title, year);
+                    result = {
+                        content: [{
+                            type: 'text',
+                            text: JSON.stringify(extractResult, null, 2)
+                        }]
+                    };
+                } else {
+                    throw new Error('Unknown tool');
+                }
+                break;
+                
+            default:
+                throw new Error('Unknown method');
+        }
+        
+        res.json({ jsonrpc: '2.0', id, result });
+    } catch (error) {
+        res.json({ 
+            jsonrpc: '2.0', 
+            id, 
+            error: { code: -32603, message: error.message } 
+        });
+    }
+});
+
 (() => {
     const clients = new Set();
 
