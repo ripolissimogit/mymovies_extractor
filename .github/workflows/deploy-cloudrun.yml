@@ -48,7 +48,12 @@ jobs:
         run: |
           IMAGE_REF="${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/containers/mymovies-api:${{ github.sha }}"
           echo "Building ${IMAGE_REF}"
-          gcloud builds submit --region "${{ vars.GCP_REGION }}" --tag "${IMAGE_REF}" .
+          BUILD_ID=$(gcloud builds submit --region "${{ vars.GCP_REGION }}" --tag "${IMAGE_REF}" . --format="value(id)")
+          echo "Build ID: $BUILD_ID"
+          
+          # Wait for build completion
+          echo "Waiting for build to complete..."
+          gcloud builds wait "$BUILD_ID" --region "${{ vars.GCP_REGION }}"
 
       - name: Deploy to Cloud Run
         run: |
