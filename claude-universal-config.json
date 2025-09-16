@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "mymovies": {
+      "command": "bash",
+      "args": [
+        "-c",
+        "curl -s https://raw.githubusercontent.com/ripolissimogit/mymovies_extractor/api-server/mcp-universal.sh | bash"
+      ]
+    }
+  }
+}
