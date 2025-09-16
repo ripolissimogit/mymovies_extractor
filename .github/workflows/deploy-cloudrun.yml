@@ -21,24 +21,28 @@ jobs:
 
       - name: Set up gcloud
         uses: google-github-actions/setup-gcloud@v2
-        with:
-          project_id: ${{ vars.GCP_PROJECT_ID }}
 
       - name: Configure gcloud
         run: |
           gcloud config set project "${{ vars.GCP_PROJECT_ID }}"
           gcloud config set run/region "${{ vars.GCP_REGION }}"
+          gcloud auth list
+          gcloud config list
 
-      - name: Enable APIs
+      - name: Enable APIs (with error handling)
         run: |
-          gcloud services enable run.googleapis.com artifactregistry.googleapis.com cloudbuild.googleapis.com
+          echo "Enabling required APIs..."
+          gcloud services enable run.googleapis.com || echo "Run API already enabled or permission issue"
+          gcloud services enable artifactregistry.googleapis.com || echo "Artifact Registry API already enabled or permission issue"  
+          gcloud services enable cloudbuild.googleapis.com || echo "Cloud Build API already enabled or permission issue"
 
       - name: Create Artifact Registry (if not exists)
         run: |
+          echo "Creating Artifact Registry repository..."
           gcloud artifacts repositories create containers \
             --repository-format=docker \
             --location="${{ vars.GCP_REGION }}" \
-            --description="MyMovies API container images" || true
+            --description="MyMovies API container images" || echo "Repository already exists"
 
       - name: Build and push image
         run: |
@@ -49,6 +53,7 @@ jobs:
       - name: Deploy to Cloud Run
         run: |
           IMAGE_REF="${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/containers/mymovies-api:${{ github.sha }}"
+          echo "Deploying ${IMAGE_REF}"
           gcloud run deploy mymovies-api \
             --image "${IMAGE_REF}" \
             --platform managed \
@@ -62,5 +67,5 @@ jobs:
 
       - name: Print service URL
         run: |
-          echo "Service deployed at:"
+          echo "Service deployed successfully!"
           gcloud run services describe mymovies-api --region "${{ vars.GCP_REGION }}" --format='value(status.url)'
