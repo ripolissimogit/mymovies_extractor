@@ -106,31 +106,62 @@ app.get('/openapi.json', (req, res) => {
         },
         "servers": [{"url": "https://mymovies-api-rflzoyubyq-oc.a.run.app"}],
         "paths": {
-            "/tools/call": {
+            "/extract": {
                 "post": {
                     "summary": "Extract movie review",
+                    "description": "Extract a complete movie review from MyMovies.it with metadata",
+                    "operationId": "extractMovieReview",
                     "requestBody": {
+                        "required": true,
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "type": "object",
                                     "properties": {
-                                        "name": {"type": "string", "enum": ["extract_movie_review"]},
-                                        "arguments": {
-                                            "type": "object",
-                                            "properties": {
-                                                "title": {"type": "string"},
-                                                "year": {"type": "number"}
-                                            },
-                                            "required": ["title", "year"]
+                                        "title": {
+                                            "type": "string",
+                                            "description": "Movie title",
+                                            "example": "Oppenheimer"
+                                        },
+                                        "year": {
+                                            "type": "integer",
+                                            "description": "Release year",
+                                            "minimum": 1900,
+                                            "maximum": 2030,
+                                            "example": 2023
                                         }
-                                    }
+                                    },
+                                    "required": ["title", "year"]
                                 }
                             }
                         }
                     },
                     "responses": {
-                        "200": {"description": "Success"}
+                        "200": {
+                            "description": "Successfully extracted review",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "success": {"type": "boolean"},
+                                            "title": {"type": "string"},
+                                            "year": {"type": "integer"},
+                                            "review": {"type": "string"},
+                                            "author": {"type": "string"},
+                                            "date": {"type": "string"},
+                                            "url": {"type": "string"}
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "400": {
+                            "description": "Bad request - missing title or year"
+                        },
+                        "500": {
+                            "description": "Server error during extraction"
+                        }
                     }
                 }
             }
