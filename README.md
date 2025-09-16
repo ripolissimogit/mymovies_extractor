@@ -22,11 +22,14 @@
 }
 ```
 
-**ChatGPT/API**:
+**Claude Web** (Web Connectors):
+OpenAPI URL: `https://mymovies-api-rflzoyubyq-oc.a.run.app/openapi.json`
+
+**API diretta**:
 ```bash
-curl -X POST https://mymovies-api-rflzoyubyq-oc.a.run.app/tools/call \
+curl -X POST https://mymovies-api-rflzoyubyq-oc.a.run.app/extract \
   -H "Content-Type: application/json" \
-  -d '{"name":"extract_movie_review","arguments":{"title":"Oppenheimer","year":2023}}'
+  -d '{"title":"Oppenheimer","year":2023}'
 ```
 
 ## 🎯 **Uso Locale**
@@ -58,6 +61,16 @@ npm start  # http://localhost:3000
 - Rate limit: 30/min
 
 **Film testati**: Oppenheimer (2023), Dune (2021), Interstellar (2014)
+
+## 🔄 **Development**
+
+**GitHub Actions**: Auto-deploy su push al branch `api-server`
+
+Vedi [DEVELOPMENT.md](./DEVELOPMENT.md) per:
+- Processo di deploy
+- Differenze Claude Web vs Claude Desktop
+- Debug e troubleshooting
+- Local development setup
 
 ---
 
