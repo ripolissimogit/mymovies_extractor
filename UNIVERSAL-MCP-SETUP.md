@@ -2,7 +2,7 @@
 
 **Funziona su qualsiasi dispositivo con Claude Desktop!**
 
-## Setup Immediato (1 minuto)
+## Setup Immediato (30 secondi)
 
 1. **Apri Claude Desktop**
 2. **Vai in Impostazioni → Estensioni**
@@ -12,10 +12,12 @@
 {
   "mcpServers": {
     "mymovies": {
-      "command": "bash",
+      "command": "curl",
       "args": [
-        "-c",
-        "curl -s https://raw.githubusercontent.com/ripolissimogit/mymovies_extractor/api-server/mcp-universal.sh | bash"
+        "-s", "-X", "POST",
+        "-H", "Content-Type: application/json",
+        "--data-binary", "@-",
+        "https://mymovies-api-61434647155.europe-west8.run.app/mcp-jsonrpc"
       ]
     }
   }
@@ -35,22 +37,28 @@
 
 - ✅ Claude Desktop
 - ✅ Connessione internet
-- ✅ `bash` e `curl` (preinstallati su Mac/Linux)
-- ✅ `node` (versione qualsiasi)
+- ✅ `curl` (preinstallato su Mac/Linux/Windows)
 
 ## Come Funziona
 
-1. Claude Desktop esegue lo script bash
-2. Lo script scarica il client MCP da GitHub
-3. Il client si connette al server Cloud Run
-4. Tutto funziona senza installazioni locali!
+1. Claude Desktop usa `curl` per inviare richieste JSON-RPC
+2. Il server Cloud Run processa le richieste
+3. Estrae recensioni da MyMovies.it
+4. Restituisce risultati strutturati
+
+## Vantaggi
+
+- 🌍 **Universale**: Funziona su qualsiasi dispositivo
+- ☁️ **Cloud-based**: Sempre aggiornato, nessuna installazione locale
+- 🚀 **Veloce**: Connessione diretta HTTP
+- 🔒 **Sicuro**: Server Google Cloud Run
 
 ## Supporto
 
 - **Repository**: https://github.com/ripolissimogit/mymovies_extractor
 - **API Server**: https://mymovies-api-61434647155.europe-west8.run.app
-- **Sempre aggiornato**: Il client si scarica automaticamente l'ultima versione
+- **Endpoint MCP**: `/mcp-jsonrpc`
 
 ---
 
-**🎬 Pronto per estrarre recensioni da MyMovies.it!**
+**🎬 Pronto per estrarre recensioni da MyMovies.it ovunque!**
