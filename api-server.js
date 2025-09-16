@@ -9,10 +9,14 @@ const express = require('express');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const { extractMovieReview } = require('./mymovies_extractor');
+const { generateVersion } = require('./generate-version');
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
 const https = require('https');
+
+// Genera versione dinamica
+const VERSION_INFO = generateVersion();
 
 // Google Cloud Storage setup
 let gcs = null;
@@ -121,8 +125,8 @@ app.get('/openapi.json', (req, res) => {
         "openapi": "3.0.1",
         "info": {
             "title": "MyMovies Review Extractor",
-            "version": "1.0.1",
-            "description": "Extract movie reviews from MyMovies.it with complete metadata including author, date, and content"
+            "version": VERSION_INFO.version,
+            "description": `Extract movie reviews from MyMovies.it with complete metadata including author, date, and content. Build: ${VERSION_INFO.gitHash} (${VERSION_INFO.commitDate})`
         },
         "servers": [
             {
@@ -299,7 +303,10 @@ app.get('/health', async (req, res) => {
         res.json({
             status: 'ok',
             service: 'MyMovies API',
-            version: '1.0.0',
+            version: VERSION_INFO.version,
+            gitHash: VERSION_INFO.gitHash,
+            commitDate: VERSION_INFO.commitDate,
+            buildDate: VERSION_INFO.buildDate,
             timestamp: new Date().toISOString(),
             puppeteer: 'ready',
             memory: process.memoryUsage(),

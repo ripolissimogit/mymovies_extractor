@@ -1,6 +1,6 @@
 {
   "name": "mymovies-extractor",
-  "version": "1.0.1",
+  "version": "2025.09.16.2048-853ccaa",
   "description": "Tool per estrarre recensioni complete da MyMovies.it con MCP Server integrato",
   "main": "mymovies_extractor.js",
   "scripts": {
@@ -14,7 +14,9 @@
     "mcp": "node mcp-server.js",
     "mcp:http": "node mcp-server.js --http",
     "mcp:test": "node test-mcp.js",
-    "mcp:install": "./install-mcp.sh"
+    "mcp:install": "./install-mcp.sh",
+    "version:generate": "node generate-version.js",
+    "version:update": "node -e \"const {generateVersion} = require('./generate-version'); const pkg = require('./package.json'); const v = generateVersion(); pkg.version = v.version; require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\\n');\""
   },
   "keywords": [
     "mymovies",

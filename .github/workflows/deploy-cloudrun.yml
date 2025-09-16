@@ -44,6 +44,12 @@ jobs:
             --location="${{ vars.GCP_REGION }}" \
             --description="MyMovies API container images" || echo "Repository already exists"
 
+      - name: Generate version info
+        run: |
+          echo "Generating version info..."
+          node generate-version.js > version-info.json
+          cat version-info.json
+
       - name: Build and push image
         run: |
           IMAGE_REF="${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/containers/mymovies-api:${{ github.sha }}"
