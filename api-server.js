@@ -687,7 +687,85 @@ app.post('/tools/call', async (req, res) => {
     }
 });
 
-// JSON-RPC MCP endpoint for Claude Desktop
+// Root JSON-RPC endpoint for MCP clients
+app.post('/', express.json(), async (req, res) => {
+    const { jsonrpc, id, method, params } = req.body || {};
+    
+    if (jsonrpc === '2.0') {
+        try {
+            let result;
+            
+            switch (method) {
+                case 'initialize':
+                    result = {
+                        protocolVersion: "2024-11-05",
+                        capabilities: { tools: {} },
+                        serverInfo: { name: "mymovies-extractor", version: "1.0.0" }
+                    };
+                    break;
+                    
+                case 'tools/list':
+                    result = {
+                        tools: [{
+                            name: "extract_movie_review",
+                            description: "Estrai recensione completa da MyMovies.it con metadata",
+                            inputSchema: {
+                                type: "object",
+                                properties: {
+                                    title: { type: "string", description: "Titolo del film" },
+                                    year: { type: "number", description: "Anno di uscita" }
+                                },
+                                required: ["title", "year"]
+                            }
+                        }]
+                    };
+                    break;
+                    
+                case 'tools/call':
+                    if (params.name === 'extract_movie_review') {
+                        const extractResult = await extractMovieReview(params.arguments.title, params.arguments.year);
+                        result = { content: [{ type: "text", text: JSON.stringify(extractResult, null, 2) }] };
+                    } else {
+                        throw new Error('Unknown tool');
+                    }
+                    break;
+                    
+                default:
+                    throw new Error('Unknown method');
+            }
+            
+            res.json({ jsonrpc: '2.0', id, result });
+        } catch (error) {
+            res.json({ 
+                jsonrpc: '2.0', 
+                id, 
+                error: { code: -32603, message: error.message } 
+            });
+        }
+    } else {
+        // Fallback per richieste non JSON-RPC
+        res.status(404).json({
+            error: "Not Found",
+            message: "Endpoint non trovato",
+            availableEndpoints: [
+                "GET /health",
+                "GET /api/info", 
+                "POST /api/extract",
+                "POST /api/extract/batch",
+                "GET /api/reviews",
+                "GET /api/reviews/:filename",
+                "GET /api/stats",
+                "GET /api/docs",
+                "POST / (JSON-RPC 2.0)",
+                "POST /initialize",
+                "POST /tools/list", 
+                "POST /tools/call"
+            ]
+        });
+    }
+});
+
+// JSON-RPC MCP endpoint for Claude Desktop (legacy)
 app.post('/mcp-jsonrpc', express.json(), async (req, res) => {
     const { id, method, params } = req.body || {};
     
