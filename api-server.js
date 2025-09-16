@@ -95,6 +95,49 @@ app.get('/api/openapi.html', (req, res) => {
     res.send(html);
 });
 
+// OpenAPI spec for Claude Web connectors
+app.get('/openapi.json', (req, res) => {
+    res.json({
+        "openapi": "3.0.0",
+        "info": {
+            "title": "MyMovies Extractor API",
+            "version": "1.0.0",
+            "description": "Extract movie reviews from MyMovies.it"
+        },
+        "servers": [{"url": "https://mymovies-api-rflzoyubyq-oc.a.run.app"}],
+        "paths": {
+            "/tools/call": {
+                "post": {
+                    "summary": "Extract movie review",
+                    "requestBody": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "name": {"type": "string", "enum": ["extract_movie_review"]},
+                                        "arguments": {
+                                            "type": "object",
+                                            "properties": {
+                                                "title": {"type": "string"},
+                                                "year": {"type": "number"}
+                                            },
+                                            "required": ["title", "year"]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "200": {"description": "Success"}
+                    }
+                }
+            }
+        }
+    });
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
     res.json({
