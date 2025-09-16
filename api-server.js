@@ -608,6 +608,85 @@ app.get('/api/openapi.json', (req, res) => {
     }
 });
 
+// Simple extract endpoint for AI clients
+app.post('/extract', async (req, res) => {
+    try {
+        const { title, year } = req.body;
+        
+        if (!title || !year) {
+            return res.status(400).json({
+                error: 'Missing required fields: title and year'
+            });
+        }
+
+        const result = await extractMovieReview(title, year);
+        
+        res.json({
+            success: true,
+            title,
+            year,
+            review: result.review?.content || 'No review found',
+            author: result.review?.author || 'Unknown',
+            date: result.review?.date || 'Unknown',
+            url: result.url
+        });
+        
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+// MCP Standard Endpoints
+app.post('/initialize', (req, res) => {
+    res.json({
+        protocolVersion: "2024-11-05",
+        capabilities: {
+            tools: {}
+        },
+        serverInfo: {
+            name: "mymovies-extractor",
+            version: "1.0.0"
+        }
+    });
+});
+
+app.post('/tools/list', (req, res) => {
+    res.json({
+        tools: [
+            {
+                name: "extract_movie_review",
+                description: "Estrai recensione completa da MyMovies.it con metadata",
+                inputSchema: {
+                    type: "object",
+                    properties: {
+                        title: { type: "string", description: "Titolo del film" },
+                        year: { type: "number", description: "Anno di uscita" }
+                    },
+                    required: ["title", "year"]
+                }
+            }
+        ]
+    });
+});
+
+app.post('/tools/call', async (req, res) => {
+    const { name, arguments: args } = req.body;
+    
+    try {
+        if (name === 'extract_movie_review') {
+            const result = await extractMovieReview(args.title, args.year);
+            res.json({ content: [{ type: "text", text: JSON.stringify(result, null, 2) }] });
+        } else {
+            res.status(400).json({ error: "Unknown tool" });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // JSON-RPC MCP endpoint for Claude Desktop
 app.post('/mcp-jsonrpc', express.json(), async (req, res) => {
     const { id, method, params } = req.body || {};
