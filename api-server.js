@@ -274,14 +274,46 @@ app.get('/.well-known/ai-plugin.json', (req, res) => {
     });
 });
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-    res.json({
-        status: 'ok',
-        service: 'MyMovies API',
-        version: '1.0.0',
-        timestamp: new Date().toISOString()
-    });
+// Health check endpoint con test Puppeteer
+app.get('/health', async (req, res) => {
+    try {
+        const puppeteer = require('puppeteer');
+        
+        // Test rapido di Puppeteer
+        const browser = await puppeteer.launch({
+            headless: 'new',
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-accelerated-2d-canvas',
+                '--no-first-run',
+                '--no-zygote',
+                '--single-process',
+                '--disable-gpu'
+            ]
+        });
+        
+        await browser.close();
+        
+        res.json({
+            status: 'ok',
+            service: 'MyMovies API',
+            version: '1.0.0',
+            timestamp: new Date().toISOString(),
+            puppeteer: 'ready',
+            memory: process.memoryUsage(),
+            uptime: process.uptime()
+        });
+    } catch (error) {
+        console.error('Health check failed:', error);
+        res.status(503).json({
+            status: 'error',
+            service: 'MyMovies API',
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
 });
 
 // Debug endpoint for Claude Web troubleshooting

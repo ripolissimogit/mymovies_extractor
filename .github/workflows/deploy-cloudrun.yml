@@ -59,11 +59,15 @@ jobs:
             --platform managed \
             --region "${{ vars.GCP_REGION }}" \
             --allow-unauthenticated \
-            --timeout=300 \
-            --concurrency=10 \
-            --cpu=1 \
-            --memory=1Gi \
-            --set-env-vars="PUPPETEER_SKIP_DOWNLOAD=true,PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium,NODE_ENV=production"
+            --timeout=900 \
+            --concurrency=1 \
+            --cpu=2 \
+            --memory=2Gi \
+            --min-instances=1 \
+            --max-instances=10 \
+            --cpu-throttling \
+            --execution-environment=gen2 \
+            --set-env-vars="PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true,PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable,CHROME_BIN=/usr/bin/google-chrome-stable,NODE_ENV=production,PUPPETEER_ARGS=--no-sandbox --disable-setuid-sandbox --disable-dev-shm-usage --disable-accelerated-2d-canvas --no-first-run --no-zygote --single-process --disable-gpu"
 
       - name: Print service URL
         run: |

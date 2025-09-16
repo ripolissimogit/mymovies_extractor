@@ -1,8 +1,10 @@
 FROM node:20-slim
 
-# Install Chromium and dependencies
+# Install Google Chrome Stable and dependencies
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
-    chromium \
+    wget \
+    curl \
+    gnupg \
     ca-certificates \
     fonts-liberation \
     libasound2 \
@@ -34,8 +36,11 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     libxrender1 \
     libxss1 \
     libxtst6 \
-    wget \
     xdg-utils \
+  && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+  && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
+  && apt-get update \
+  && apt-get install -y google-chrome-stable \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -51,16 +56,21 @@ USER pptruser
 
 COPY package*.json ./
 
-# Skip Chromium download (system Chromium installed)
-ENV PUPPETEER_SKIP_DOWNLOAD=true
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+# Puppeteer optimizations for Cloud Run
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+ENV CHROME_BIN=/usr/bin/google-chrome-stable
 ENV NODE_ENV=production
+ENV PUPPETEER_ARGS="--no-sandbox,--disable-setuid-sandbox,--disable-dev-shm-usage,--disable-accelerated-2d-canvas,--no-first-run,--no-zygote,--single-process,--disable-gpu"
 
 RUN npm ci --omit=dev
 
 COPY . .
 
-# Render will provide PORT; Express reads process.env.PORT
 EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:3000/health || exit 1
 
 CMD ["node", "api-server.js"]
