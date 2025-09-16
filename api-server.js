@@ -97,21 +97,30 @@ app.get('/api/openapi.html', (req, res) => {
 
 // OpenAPI spec for Claude Web connectors
 app.get('/openapi.json', (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.json({
-        "openapi": "3.0.0",
+        "openapi": "3.0.1",
         "info": {
-            "title": "MyMovies Extractor API",
-            "version": "1.0.0",
-            "description": "Extract movie reviews from MyMovies.it"
+            "title": "MyMovies Review Extractor",
+            "version": "1.0.1",
+            "description": "Extract movie reviews from MyMovies.it with complete metadata including author, date, and content"
         },
-        "servers": [{"url": "https://mymovies-api-rflzoyubyq-oc.a.run.app"}],
+        "servers": [
+            {
+                "url": "https://mymovies-api-rflzoyubyq-oc.a.run.app",
+                "description": "Production server"
+            }
+        ],
         "paths": {
             "/extract": {
                 "post": {
-                    "summary": "Extract movie review",
-                    "description": "Extract a complete movie review from MyMovies.it with metadata",
+                    "summary": "Extract movie review from MyMovies.it",
+                    "description": "Extracts a complete movie review from MyMovies.it including the full text, author, publication date, and metadata. Supports movies from 1900 to 2030.",
                     "operationId": "extractMovieReview",
+                    "tags": ["reviews"],
                     "requestBody": {
+                        "description": "Movie information for review extraction",
                         "required": true,
                         "content": {
                             "application/json": {
@@ -120,52 +129,130 @@ app.get('/openapi.json', (req, res) => {
                                     "properties": {
                                         "title": {
                                             "type": "string",
-                                            "description": "Movie title",
-                                            "example": "Oppenheimer"
+                                            "description": "The title of the movie",
+                                            "example": "Oppenheimer",
+                                            "minLength": 1,
+                                            "maxLength": 200
                                         },
                                         "year": {
                                             "type": "integer",
-                                            "description": "Release year",
+                                            "description": "The release year of the movie",
                                             "minimum": 1900,
                                             "maximum": 2030,
                                             "example": 2023
                                         }
                                     },
-                                    "required": ["title", "year"]
+                                    "required": ["title", "year"],
+                                    "additionalProperties": false
                                 }
                             }
                         }
                     },
                     "responses": {
                         "200": {
-                            "description": "Successfully extracted review",
+                            "description": "Review successfully extracted",
                             "content": {
                                 "application/json": {
                                     "schema": {
                                         "type": "object",
                                         "properties": {
-                                            "success": {"type": "boolean"},
-                                            "title": {"type": "string"},
-                                            "year": {"type": "integer"},
-                                            "review": {"type": "string"},
-                                            "author": {"type": "string"},
-                                            "date": {"type": "string"},
-                                            "url": {"type": "string"}
-                                        }
+                                            "success": {
+                                                "type": "boolean",
+                                                "description": "Whether the extraction was successful",
+                                                "example": true
+                                            },
+                                            "title": {
+                                                "type": "string",
+                                                "description": "Movie title"
+                                            },
+                                            "year": {
+                                                "type": "integer",
+                                                "description": "Movie release year"
+                                            },
+                                            "review": {
+                                                "type": "string",
+                                                "description": "Complete review text"
+                                            },
+                                            "author": {
+                                                "type": "string",
+                                                "description": "Review author name"
+                                            },
+                                            "date": {
+                                                "type": "string",
+                                                "description": "Publication date"
+                                            },
+                                            "url": {
+                                                "type": "string",
+                                                "format": "uri",
+                                                "description": "Source URL on MyMovies.it"
+                                            }
+                                        },
+                                        "required": ["success", "title", "year", "review", "author", "date", "url"]
                                     }
                                 }
                             }
                         },
                         "400": {
-                            "description": "Bad request - missing title or year"
+                            "description": "Bad request - invalid or missing parameters",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "success": {"type": "boolean", "example": false},
+                                            "error": {"type": "string"}
+                                        }
+                                    }
+                                }
+                            }
                         },
                         "500": {
-                            "description": "Server error during extraction"
+                            "description": "Internal server error during extraction",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "success": {"type": "boolean", "example": false},
+                                            "error": {"type": "string"}
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
-        }
+        },
+        "tags": [
+            {
+                "name": "reviews",
+                "description": "Movie review extraction operations"
+            }
+        ]
+    });
+});
+
+// Well-known endpoint for Claude Web discovery
+app.get('/.well-known/ai-plugin.json', (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.json({
+        "schema_version": "v1",
+        "name_for_human": "MyMovies Review Extractor",
+        "name_for_model": "mymovies_extractor",
+        "description_for_human": "Extract complete movie reviews from MyMovies.it with metadata",
+        "description_for_model": "Extract movie reviews from MyMovies.it. Provide movie title and year to get complete review text, author, publication date, and source URL.",
+        "auth": {
+            "type": "none"
+        },
+        "api": {
+            "type": "openapi",
+            "url": "https://mymovies-api-rflzoyubyq-oc.a.run.app/openapi.json"
+        },
+        "logo_url": "https://mymovies-api-rflzoyubyq-oc.a.run.app/logo.png",
+        "contact_email": "noreply@example.com",
+        "legal_info_url": "https://github.com/ripolissimogit/mymovies_extractor"
     });
 });
 
