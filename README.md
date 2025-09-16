@@ -16,7 +16,25 @@
   "mcpServers": {
     "mymovies": {
       "command": "curl",
-      "args": ["-N", "https://mymovies-api-rflzoyubyq-oc.a.run.app/mcp"]
+      "args": [
+        "-N",
+        "-H", "Accept: text/event-stream",
+        "-H", "Cache-Control: no-cache",
+        "https://mymovies-api-rflzoyubyq-oc.a.run.app/mcp"
+      ]
+    }
+  }
+}
+```
+
+**Server Locale** (se installato localmente):
+```json
+{
+  "mcpServers": {
+    "mymovies": {
+      "command": "node",
+      "args": ["./mcp-server.js"],
+      "cwd": "/percorso/al/mymovies_extractor"
     }
   }
 }
