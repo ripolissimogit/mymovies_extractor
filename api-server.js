@@ -51,10 +51,28 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
-// Logging middleware
+// Enhanced logging middleware with Claude Web detection
 app.use((req, res, next) => {
     const timestamp = new Date().toISOString();
-    console.log(`${timestamp} ${req.method} ${req.path} - ${req.ip}`);
+    const userAgent = req.get('User-Agent') || 'Unknown';
+    const claudeIndicators = [
+        'claude', 'anthropic', 'web-connector', 'openai', 'chatgpt', 'ai-plugin'
+    ];
+    const isAI = claudeIndicators.some(indicator =>
+        userAgent.toLowerCase().includes(indicator)
+    );
+
+    if (isAI || req.path.includes('openapi') || req.path.includes('.well-known')) {
+        console.log(`🤖 AI REQUEST: ${timestamp} ${req.method} ${req.path}`);
+        console.log(`   User-Agent: ${userAgent}`);
+        console.log(`   IP: ${req.ip}`);
+        console.log(`   Headers: ${JSON.stringify(req.headers, null, 2)}`);
+        if (req.body && Object.keys(req.body).length > 0) {
+            console.log(`   Body: ${JSON.stringify(req.body, null, 2)}`);
+        }
+    } else {
+        console.log(`${timestamp} ${req.method} ${req.path} - ${req.ip}`);
+    }
     next();
 });
 
@@ -264,6 +282,83 @@ app.get('/health', (req, res) => {
         version: '1.0.0',
         timestamp: new Date().toISOString()
     });
+});
+
+// Debug endpoint for Claude Web troubleshooting
+app.get('/debug/claude', (req, res) => {
+    const debugInfo = {
+        timestamp: new Date().toISOString(),
+        server: {
+            status: 'operational',
+            version: '1.0.1',
+            endpoints: {
+                openapi: '/openapi.json',
+                wellKnown: '/.well-known/ai-plugin.json',
+                extract: '/extract',
+                health: '/health'
+            }
+        },
+        request: {
+            ip: req.ip,
+            userAgent: req.get('User-Agent'),
+            headers: req.headers,
+            method: req.method,
+            path: req.path,
+            query: req.query
+        },
+        tests: {
+            openapi_accessible: true,
+            extract_endpoint: true,
+            cors_enabled: true
+        }
+    };
+
+    console.log('🔍 DEBUG REQUEST:', JSON.stringify(debugInfo, null, 2));
+    res.json(debugInfo);
+});
+
+// Claude Web connection test endpoint
+app.post('/debug/test-extract', async (req, res) => {
+    console.log('🧪 TEST EXTRACT REQUEST');
+    console.log('Headers:', JSON.stringify(req.headers, null, 2));
+    console.log('Body:', JSON.stringify(req.body, null, 2));
+
+    try {
+        const { title, year } = req.body;
+
+        if (!title || !year) {
+            console.log('❌ VALIDATION ERROR: Missing title or year');
+            return res.status(400).json({
+                success: false,
+                error: 'Missing required fields: title and year',
+                received: { title, year },
+                debug: true
+            });
+        }
+
+        console.log(`✅ VALIDATION PASSED: "${title}" (${year})`);
+
+        // Quick test without actual extraction
+        res.json({
+            success: true,
+            title,
+            year,
+            review: 'TEST: This is a debug response. Real extraction would happen here.',
+            author: 'Debug Author',
+            date: new Date().toLocaleDateString('it-IT'),
+            url: `https://www.mymovies.it/film/${year}/${title.toLowerCase()}`,
+            debug: true,
+            timestamp: new Date().toISOString()
+        });
+
+    } catch (error) {
+        console.log('💥 TEST ERROR:', error.message);
+        res.status(500).json({
+            success: false,
+            error: error.message,
+            debug: true
+        });
+    }
 });
 
 // API Info endpoint
@@ -769,33 +864,66 @@ app.get('/api/openapi.json', (req, res) => {
     }
 });
 
-// Simple extract endpoint for AI clients
+// Simple extract endpoint for AI clients with enhanced logging
 app.post('/extract', async (req, res) => {
+    const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const startTime = Date.now();
+
+    console.log(`🎬 [${requestId}] EXTRACT REQUEST STARTED`);
+    console.log(`   User-Agent: ${req.get('User-Agent')}`);
+    console.log(`   Content-Type: ${req.get('Content-Type')}`);
+    console.log(`   Body: ${JSON.stringify(req.body)}`);
+
     try {
         const { title, year } = req.body;
-        
+
         if (!title || !year) {
+            console.log(`❌ [${requestId}] VALIDATION ERROR: Missing fields`);
+            console.log(`   Received: title="${title}", year="${year}"`);
             return res.status(400).json({
-                error: 'Missing required fields: title and year'
+                success: false,
+                error: 'Missing required fields: title and year',
+                received: { title, year },
+                requestId
             });
         }
 
+        console.log(`✅ [${requestId}] VALIDATION PASSED: "${title}" (${year})`);
+        console.log(`🔄 [${requestId}] Starting extraction...`);
+
         const result = await extractMovieReview(title, year);
-        
+        const processingTime = Date.now() - startTime;
+
+        if (result.success) {
+            console.log(`✅ [${requestId}] EXTRACTION SUCCESS in ${processingTime}ms`);
+            console.log(`   Review length: ${result.review?.content?.length || 0} chars`);
+            console.log(`   Author: ${result.review?.author}`);
+        } else {
+            console.log(`❌ [${requestId}] EXTRACTION FAILED: ${result.error}`);
+        }
+
         res.json({
-            success: true,
-            title,
+            success: result.success,
+            title: result.review?.title || title,
             year,
             review: result.review?.content || 'No review found',
             author: result.review?.author || 'Unknown',
             date: result.review?.date || 'Unknown',
-            url: result.url
+            url: result.url,
+            requestId,
+            processingTime
         });
-        
+
     } catch (error) {
+        const processingTime = Date.now() - startTime;
+        console.log(`💥 [${requestId}] EXTRACTION ERROR in ${processingTime}ms: ${error.message}`);
+        console.log(`   Stack: ${error.stack}`);
+
         res.status(500).json({
             success: false,
-            error: error.message
+            error: error.message,
+            requestId,
+            processingTime
         });
     }
 });
