@@ -4,3 +4,4 @@ node_modules/
 reviews/*.txt
 reviews/*/
 !reviews/.gitkeep
+.env
