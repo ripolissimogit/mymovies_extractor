@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyMovies Extractor - Web Interface</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-film"></i> MyMovies Extractor</h1>
+                <p>Interfaccia web per l'estrazione di recensioni cinematografiche</p>
+            </div>
+            <div class="stats-bar" id="statsBar">
+                <div class="stat-item">
+                    <i class="fas fa-file-text"></i>
+                    <span id="totalReviews">0</span> recensioni
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-database"></i>
+                    <span id="totalSize">0 KB</span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-clock"></i>
+                    <span id="lastUpdate">Mai</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Search Section -->
+            <section class="search-section">
+                <div class="search-card">
+                    <h2><i class="fas fa-search"></i> Cerca e Estrai Recensioni</h2>
+                    
+                    <!-- Search Form -->
+                    <div class="search-form">
+                        <div class="input-group">
+                            <input type="text" id="searchInput" placeholder="Cerca film (es. Oppenheimer, Dune, Interstellar...)" />
+                            <button id="searchBtn" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Cerca
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Search Results -->
+                    <div id="searchResults" class="search-results hidden"></div>
+
+                    <!-- Direct Extraction -->
+                    <div class="direct-extraction">
+                        <h3>Estrazione Diretta</h3>
+                        <div class="extraction-form">
+                            <input type="text" id="directTitle" placeholder="Titolo film" />
+                            <input type="number" id="directYear" placeholder="Anno" min="1900" max="2030" />
+                            <button id="extractBtn" class="btn btn-secondary">
+                                <i class="fas fa-download"></i> Estrai
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reviews Library -->
+            <section class="reviews-section">
+                <div class="reviews-header">
+                    <h2><i class="fas fa-library"></i> Libreria Recensioni</h2>
+                    <button id="refreshBtn" class="btn btn-outline">
+                        <i class="fas fa-sync-alt"></i> Aggiorna
+                    </button>
+                </div>
+                
+                <div id="reviewsList" class="reviews-list">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i> Caricamento recensioni...
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Extraction Modal -->
+        <div id="extractionModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-cog fa-spin"></i> Estrazione in Corso</h3>
+                </div>
+                <div class="modal-body">
+                    <div class="extraction-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill"></div>
+                        </div>
+                        <p id="extractionStatus">Inizializzazione...</p>
+                        <div class="extraction-details">
+                            <p><strong>Film:</strong> <span id="extractingTitle">-</span></p>
+                            <p><strong>Anno:</strong> <span id="extractingYear">-</span></p>
+                            <p><strong>Tempo trascorso:</strong> <span id="extractionTime">0s</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Review Modal -->
+        <div id="reviewModal" class="modal hidden">
+            <div class="modal-content large">
+                <div class="modal-header">
+                    <h3 id="reviewTitle">Recensione</h3>
+                    <button class="modal-close" onclick="closeReviewModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="reviewContent" class="review-content"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
